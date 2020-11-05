@@ -1,4 +1,4 @@
-# Serving ML models with TorchServe
+# Serving ML models with TorchServe :fire: 
 
 ![](https://miro.medium.com/max/1024/1*KKADWARPMxHb-WMxCgW_xA.png)
 
