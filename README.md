@@ -4,9 +4,10 @@
 
 TorchServe is the ML model serving framework developed by PyTorch. Along this repository, the fundamentals
 will be explained so as to deploy a sample CNN model trained to classify images from a food dataset
-which is called [FoodX-251](https://www.groundai.com/project/foodx-251-a-dataset-for-fine-grained-food-classification/1),
-which contains images of up to 251 food classes, but in this case we will just use a "slice" of that
-dataset which contains just 10 classes. Please, find the dataset [here](dataset/).
+which is called [Food101](https://www.tensorflow.org/datasets/catalog/food101),
+which contains images of up to 101 food classes, but in this case we will just use a "slice" of that
+dataset which contains just 10 classes. Please, find the dataset [here](dataset/). Credits for the dataset
+slice go to @mrdbourke (as he nicely provided me the information at Twitter).
 
 __WARNING__: TorchServe is experimental and subject to change.
 
@@ -26,7 +27,19 @@ __WARNING__: TorchServe is experimental and subject to change.
 
 ## :robot: Modelling
 
+As the modelling is not the most relevant part/section that aims to be covered along this repository, we 
+will just be using transfer learning from a pre-trained [ResNet](https://arxiv.org/abs/1512.03385) as it is 
+the SOTA when it comes to image classification.
+
+In this case, as we want to serve a PyTorch model, we will be using [PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
+and more concretely, ResNet50, where the 50 stands for the number of layers that it contains, which in this case 
+is 50.
+
 ...
+
+Explain how to load the model and some considerations towards preparing the model for TorchServe.
+
+Find more Image Classification pre-trained PyTorch models at: https://pytorch.org/docs/stable/torchvision/models.html#classification
 
 ---
 
@@ -38,9 +51,9 @@ as described in the section above.
 __1. Generate MAR file:__ first of all you will need to generate the MAR file, which is the servable archive of the model
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
 
-```bash
-torch-model-archiver ...
-```
+  ```bash
+  torch-model-archiver ...
+  ```
 
 __2. Deploy TorchServe:__
 
@@ -48,9 +61,9 @@ __3. Register the model:__
 
 __4. Check its status:__
 
-```bash
-curl http://localhost:8080/ping
-```
+  ```bash
+  curl http://localhost:8080/ping
+  ```
 
 ---
 
