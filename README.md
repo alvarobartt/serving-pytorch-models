@@ -13,15 +13,18 @@ __WARNING__: TorchServe is experimental and subject to change.
 
 ---
 
-## :closed_book: Contents
+## :closed_book: Table of Contents
 
-...
+- [Requirements](#hammer_and_wrench-requirements)
+- [Modelling](#robot-modelling)
+- [Deployment](#rocket-deployment)
+- [Usage](#mage_man-usage)
 
 ---
 
 ## :hammer_and_wrench: Requirements
 
-...
+- torch, torchvision, torchserve, torch-model-archiver
 
 ---
 
@@ -60,7 +63,10 @@ __2. Deploy TorchServe:__
   torchserve --start --ncs --model-store model-store --models foodnet=foodnet_resnet18.mar
   ```
 
-__3. Register the model:__
+  __Note__: another procedure can be deploying TorchServe first using the command 
+  `torchserve --start --ncs --model-store model-store` (without defining the models) and then registering the model
+  using the Management API via a HTTP POST request like `curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"` 
+  and later you can also scale the workers using `curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"`.
 
 __3. Check its status:__ in order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
 request to the Inference API deployed by default in the `8080` port, but you should check the `config.properties` file, which
@@ -87,14 +93,50 @@ and make the inference. In this case, as the problem we are facing is an image c
 image as the one provided below and then send it as a file on the HTTP request's body as it follows:
 
 ```bash
-wget https://assets.epicurious.com/photos/57c5c6d9cf9e9ad43de2d96e/master/pass/the-ultimate-hamburger.jpg
-curl -X POST http://localhost:8080/predictions/foodnet -T the-ultimate-hamburger.jpg
+wget https://assets.epicurious.com/photos/57c5c6d9cf9e9ad43de2d96e/master/pass/the-ultimate-hamburger.jpg # TODO: update with GitHub URL
+curl -X POST http://localhost:8080/predictions/foodnet -T sample.jpg
+```
+
+Which should output something similar to:
+
+```json
+{
+  "hamburger": 0.6911126375198364,
+  "grilled_salmon": 0.11039528995752335,
+  "pizza": 0.039219316095113754,
+  "steak": 0.03642556071281433,
+  "chicken_curry": 0.03306535258889198,
+  "sushi": 0.028345594182610512,
+  "chicken_wings": 0.027532529085874557,
+  "fried_rice": 0.01296720840036869,
+  "ice_cream": 0.012180349789559841,
+  "ramen": 0.008756187744438648
+}
 ```
 
 The commands above translated into Python code looks like:
 
 ```python
-urllib ...
-from io import BytesIO ...
-import requests ...
+# Download a sample image from the available samples at alvarobartt/pytorch-model-serving/images
+import urllib
+url, filename = ("https://github.com/pytorch/hub/raw/master/images/dog.jpg", "dog.jpg") # TODO: update with GitHub URL
+try: urllib.URLopener().retrieve(url, filename)
+except: urllib.request.urlretrieve(url, filename)
+
+# Transform the input image into a bytes object
+import cv2
+from PIL import Image
+from io import BytesIO
+
+image = Image.fromarray(cv2.imread(filename))
+image2bytes = BytesIO()
+image.save(image2bytes, format="PNG")
+image2bytes.seek(0)
+image_as_bytes = image2bytes.read()
+
+# Send the HTTP POST request to TorchServe
+import requests
+
+req = requests.post("http://localhost:8080/predictions/foodnet", data=image_as_bytes)
+if req.status_code == 200: res = req.json()
 ```
