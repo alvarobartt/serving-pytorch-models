@@ -10,7 +10,7 @@ dataset which contains just 10 classes. Please, find the dataset [here](dataset/
 
 Credits for the dataset slice go to @mrdbourke, as he nicely provided me the information at 
 Twitter, and credits for the tips on how to serve a PyTorch model using TorchServe go to 
-@pranshantsail as he explained in [this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
+@prashantsail as he explained in [this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
 
 __WARNING__: TorchServe is experimental and subject to change.
 
@@ -54,6 +54,8 @@ Find more Image Classification pre-trained PyTorch models at: https://pytorch.or
 In order to deploy the model you will need to reproduce the following steps once you installed all the requirements
 as described in the section above.
 
+  ---
+
 __1. Generate MAR file:__ first of all you will need to generate the MAR file, which is the servable archive of the model
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
 
@@ -62,6 +64,8 @@ generated with `torch-model-archiver`. So on, in order to do so, you will need t
   ```
 
   More information regarding `torch-model-archiver` available at [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
+
+  ---
 
 __2. Deploy TorchServe:__ once you create the MAR servable model, you just need to serve it. The serving process
 of a pre-trained PyTorch model as a MAR file, starts with the deployment of the TorchServe REST APIs, which are the
@@ -89,6 +93,8 @@ are stored, so that they are deployed within the API at startup.
 
   More information regarding `torchserve` available at [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
 
+  ---
+
 __3. Check its status:__ in order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
 request to the Inference API deployed by default in the `8080` port, but you should check the `config.properties` file, which
 specifies `inference_address` including the port.
@@ -101,7 +107,7 @@ specifies `inference_address` including the port.
 
   ```json
   {
-    'status': 'Healthy'
+    "status": "Healthy"
   }
   ```
 
@@ -118,7 +124,7 @@ and make the inference. In this case, as the problem we are facing is an image c
 image as the one provided below and then send it as a file on the HTTP request's body as it follows:
 
 ```bash
-wget https://assets.epicurious.com/photos/57c5c6d9cf9e9ad43de2d96e/master/pass/the-ultimate-hamburger.jpg # TODO: update with GitHub URL
+wget https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/sample.jpg
 curl -X POST http://localhost:8080/predictions/foodnet -T sample.jpg
 ```
 
@@ -144,7 +150,7 @@ The commands above translated into Python code looks like:
 ```python
 # Download a sample image from the available samples at alvarobartt/pytorch-model-serving/images
 import urllib
-url, filename = ("https://github.com/pytorch/hub/raw/master/images/dog.jpg", "dog.jpg") # TODO: update with GitHub URL
+url, filename = ("https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/sample.jpg", "sample.jpg")
 try: urllib.URLopener().retrieve(url, filename)
 except: urllib.request.urlretrieve(url, filename)
 
