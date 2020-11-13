@@ -52,17 +52,31 @@ __1. Generate MAR file:__ first of all you will need to generate the MAR file, w
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
 
   ```bash
-  torch-model-archiver ...
+  torch-model-archiver --model-name foodnet_resnet50 --version 1.0 --model-file model/model.py --serialized-file model/foodnet_resnet50.pth --handler model/foodnet_handler.py --extra-files model/...,model/...
   ```
 
 __2. Deploy TorchServe:__
 
+  ```bash
+  torchserve --start --ncs --ts-config model/config.properties --model-store model/model-store --models foodnet=foodnet_resnet50.mar
+  ```
+
 __3. Register the model:__
 
-__4. Check its status:__
+__4. Check its status:__ in order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
+request to the Inference API deployed by deafult in the `8080` port, but you should check the `config.properties` file, which
+specifies `inference_address` including the port.
 
   ```bash
   curl http://localhost:8080/ping
+  ```
+
+  If everything goes as expected, it should output the following response:
+
+  ```json
+  {
+    'status': 'Healthy'
+  }
   ```
 
 ---
