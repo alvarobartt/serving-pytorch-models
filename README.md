@@ -6,8 +6,11 @@ TorchServe is the ML model serving framework developed by PyTorch. Along this re
 will be explained so as to deploy a sample CNN model trained to classify images from a food dataset
 which is called [Food101](https://www.tensorflow.org/datasets/catalog/food101),
 which contains images of up to 101 food classes, but in this case we will just use a "slice" of that
-dataset which contains just 10 classes. Please, find the dataset [here](dataset/). Credits for the dataset
-slice go to @mrdbourke (as he nicely provided me the information at Twitter).
+dataset which contains just 10 classes. Please, find the dataset [here](dataset/).
+
+Credits for the dataset slice go to @mrdbourke, as he nicely provided me the information at 
+Twitter, and credits for the tips on how to serve a PyTorch model using TorchServe go to 
+@pranshantsail as he explained in [this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
 
 __WARNING__: TorchServe is experimental and subject to change.
 
@@ -25,6 +28,7 @@ __WARNING__: TorchServe is experimental and subject to change.
 ## :hammer_and_wrench: Requirements
 
 - torch, torchvision, torchserve, torch-model-archiver
+- Java, JDK 11
 
 ---
 
@@ -57,16 +61,33 @@ generated with `torch-model-archiver`. So on, in order to do so, you will need t
   torch-model-archiver --model-name foodnet_resnet18 --version 1.0 --model-file foodnet/model.py --serialized-file foodnet/foodnet_resnet18.pth --handler foodnet/handler.py --extra-files foodnet/index_to_name.json
   ```
 
-__2. Deploy TorchServe:__
+  More information regarding `torch-model-archiver` available at [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
+
+__2. Deploy TorchServe:__ once you create the MAR servable model, you just need to serve it. The serving process
+of a pre-trained PyTorch model as a MAR file, starts with the deployment of the TorchServe REST APIs, which are the
+Inference API, Management API and Metrics API, deployed by default on `localhost` (of if you prefer `127.0.0.1`) in the
+ports 8080, 8081 and 8082, respectively. While deploying TorchServe, you can also specify the directory where the MAR files
+are stored, so that they are deployed within the API at startup.
+
+  So on, the command to deploy the current MAR model stored under model-store/ is the following:
 
   ```bash
   torchserve --start --ncs --model-store model-store --models foodnet=foodnet_resnet18.mar
   ```
 
+  Where the flag `--start` means that you want to start the TorchServe service (deploy the APIs), the flag `--ncs`
+  means that you want to disable the snapshot feature (optional), `--model-store` is the directory where the MAR files
+  are stored and `--models` is/are the name/s of the model/s that will be served on the startup, including both an alias 
+  which will be the API endpoint of that concrete model and the filename of that model, with format `endpoint=model_name.mar`.
+
+  ...
+
   __Note__: another procedure can be deploying TorchServe first using the command 
   `torchserve --start --ncs --model-store model-store` (without defining the models) and then registering the model
   using the Management API via a HTTP POST request like `curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"` 
   and later you can also scale the workers using `curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"`.
+
+  More information regarding `torchserve` available at [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
 
 __3. Check its status:__ in order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
 request to the Inference API deployed by default in the `8080` port, but you should check the `config.properties` file, which
@@ -83,6 +104,10 @@ specifies `inference_address` including the port.
     'status': 'Healthy'
   }
   ```
+
+  __Note__: If the status of the health-check request was `"Unhealthy"`, you should check the logs either from the console from where
+  you did run the TorchServe deployment or from the `logs/` directory that is created automatically while deploying TorchServe from
+  the same directory where you deployed it.
 
 ---
 
