@@ -32,8 +32,7 @@ will just be using transfer learning from a pre-trained [ResNet](https://arxiv.o
 the SOTA when it comes to image classification.
 
 In this case, as we want to serve a PyTorch model, we will be using [PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
-and more concretely, ResNet50, where the 50 stands for the number of layers that it contains, which in this case 
-is 50.
+and more concretely, ResNet18, where the 18 stands for the number of layers that it contains.
 
 ...
 
@@ -52,19 +51,19 @@ __1. Generate MAR file:__ first of all you will need to generate the MAR file, w
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
 
   ```bash
-  torch-model-archiver --model-name foodnet_resnet50 --version 1.0 --model-file model/model.py --serialized-file model/foodnet_resnet50.pth --handler model/foodnet_handler.py --extra-files model/...,model/...
+  torch-model-archiver --model-name foodnet_resnet18 --version 1.0 --model-file foodnet/model.py --serialized-file foodnet/foodnet_resnet18.pth --handler foodnet/handler.py --extra-files foodnet/index_to_name.json
   ```
 
 __2. Deploy TorchServe:__
 
   ```bash
-  torchserve --start --ncs --ts-config model/config.properties --model-store model/model-store --models foodnet=foodnet_resnet50.mar
+  torchserve --start --ncs --model-store model-store --models foodnet=foodnet_resnet18.mar
   ```
 
 __3. Register the model:__
 
-__4. Check its status:__ in order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
-request to the Inference API deployed by deafult in the `8080` port, but you should check the `config.properties` file, which
+__3. Check its status:__ in order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
+request to the Inference API deployed by default in the `8080` port, but you should check the `config.properties` file, which
 specifies `inference_address` including the port.
 
   ```bash
