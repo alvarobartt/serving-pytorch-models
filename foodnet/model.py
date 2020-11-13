@@ -13,6 +13,6 @@ class ImageClassifier(ResNet):
             nn.Linear(BasicBlock.expansion, 128),
             nn.ReLU(),
             nn.Dropout(.2),
-            nn.Linear(128, num_classes),
+            nn.Linear(128, 10),
             nn.LogSoftmax(dim=1)
         )
