@@ -41,11 +41,21 @@ the SOTA when it comes to image classification.
 In this case, as we want to serve a PyTorch model, we will be using [PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
 and more concretely, ResNet18, where the 18 stands for the number of layers that it contains.
 
-...
+  ---
 
-Explain how to load the model and some considerations towards preparing the model for TorchServe.
+TODO: Explain how to load the model and some considerations towards preparing the model for TorchServe.
 
-Find more Image Classification pre-trained PyTorch models at: https://pytorch.org/docs/stable/torchvision/models.html#classification
+TODO: Regarding the training process, ...
+
+TODO: Finally, in order to dump ...
+
+TODO: Include NVIDIA specs & some information regarding the GPU usage ...
+
+TODO: Next step is to prepare the model files as the `state_dict` previosuly dumped as a .pth file will be loaded into
+a model, which obviously must have the same architecture as the trained model ...
+
+You can find more Image Classification pre-trained PyTorch models at 
+[PyTorch Image Classification Models](https://pytorch.org/docs/stable/torchvision/models.html#classification).
 
 ---
 
@@ -60,8 +70,22 @@ __1. Generate MAR file:__ first of all you will need to generate the MAR file, w
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
 
   ```bash
-  torch-model-archiver --model-name foodnet_resnet18 --version 1.0 --model-file foodnet/model.py --serialized-file foodnet/foodnet_resnet18.pth --handler foodnet/handler.py --extra-files foodnet/index_to_name.json
+  torch-model-archiver --model-name foodnet_resnet18 \
+                       --version 1.0 \
+                       --model-file foodnet/model.py \
+                       --serialized-file foodnet/foodnet_resnet18.pth \
+                       --handler foodnet/handler.py \
+                       --extra-files foodnet/index_to_name.json
   ```
+
+  Where the flag `--model-name` stands for the name that the generated MAR servable file will have, the `--version` is optional
+  but it's a nice practice to include the version of the models so as to keep a proper tracking over them and finally you will need
+  to specify the model's architecture file with the flag `--model-file`, the dumped state_dict of the trained model with the flag
+  `--serialized-file` and the handler which will be in charge of the data preprocessing, inference and postprocessing with `--handler`,
+  but you don't need to create custom ones as you can use the available handlers at TorchServe. Additionally, as this is a classification
+  problem you can include the dictionary/json containing the relationships between the IDs (model's target) and the labels/names and/or 
+  also additional files required by the model-file to work properly, with the flag `--extra-files`, separating the different files with 
+  commas.
 
   More information regarding `torch-model-archiver` available at [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
 
@@ -115,6 +139,18 @@ specifies `inference_address` including the port.
   you did run the TorchServe deployment or from the `logs/` directory that is created automatically while deploying TorchServe from
   the same directory where you deployed it.
 
+__4. Stop TorchServe:__ once you are done and you no longer need TorchServe, you can gracefully shut it down with the
+following command:
+  
+  ```bash
+  torchserve --stop
+  ```
+
+  Then the next time you deploy TorchServe, it will take less time than the first one if the models to be server were already
+  registered/loaded, as TorchServe keeps them cached under a `/tmp` directory so it won't need to load them again if neither the name nor 
+  the version changed. On the other hand, if you register a new model, TorchServe will have to load it and it may take a little 
+  bit more of time depending on your machine specs. 
+
 ---
 
 ## :mage_man: Usage
@@ -145,6 +181,12 @@ Which should output something similar to:
 }
 ```
 
+__Remember__: that the original inference's output is the dict with the identifier of each class, not the class names,
+in this case as we included `index_to_name.json` as an extra-file while creating the MAR, TorchServe is automatically 
+assigning the identifiers with the class names so that the prediction is clearer.
+
+  ---
+
 The commands above translated into Python code looks like:
 
 ```python
@@ -171,3 +213,10 @@ import requests
 req = requests.post("http://localhost:8080/predictions/foodnet", data=image_as_bytes)
 if req.status_code == 200: res = req.json()
 ```
+
+__Note__: that to execute the piece of sample code above you will need more requirements than the ones specified in the
+[Requirements section](#hammer_and_wrench-requirements) so just run the following command so as to install them:
+
+  ```bash
+  pip install opencv-python pillow requests --upgrade
+  ```
