@@ -2,15 +2,11 @@
 
 ![PyTorch Logo](https://miro.medium.com/max/1024/1*KKADWARPMxHb-WMxCgW_xA.png)
 
-TorchServe is the ML model serving framework developed by PyTorch. Along this repository, the fundamentals
-will be explained so as to deploy a sample CNN model trained to classify images from a food dataset
-which is called [Food101](https://www.tensorflow.org/datasets/catalog/food101),
-which contains images of up to 101 food classes, but in this case we will just use a "slice" of that
-dataset which contains just 10 classes. Please, find the dataset [here](dataset/).
+__TorchServe is the ML model serving framework developed by PyTorch__.
 
-Credits for the dataset slice go to @mrdbourke, as he nicely provided me the information at 
-Twitter, and credits for the tips on how to serve a PyTorch model using TorchServe go to 
-@prashantsail as he explained in [this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
+Along this repository, the procedure so as to train and deploy a transfer learning CNN model which
+classifies images retrieved from a slice of a well known food dataset, named 
+[Food101](https://www.tensorflow.org/datasets/catalog/food101).
 
 __WARNING__: TorchServe is experimental and subject to change.
 
@@ -19,9 +15,11 @@ __WARNING__: TorchServe is experimental and subject to change.
 ## :closed_book: Table of Contents
 
 - [Requirements](#hammer_and_wrench-requirements)
+- [Dataset](#open_file_folder-dataset)
 - [Modelling](#robot-modelling)
 - [Deployment](#rocket-deployment)
 - [Usage](#mage_man-usage)
+- [Credits](#computer-credits)
 
 ---
 
@@ -29,6 +27,13 @@ __WARNING__: TorchServe is experimental and subject to change.
 
 - torch, torchvision, torchserve, torch-model-archiver
 - Java, JDK 11
+
+---
+
+## :open_file_folder: Dataset
+
+TODO: explain what does the dataset contain
+TODO: include an overview with a sample image per class
 
 ---
 
@@ -176,8 +181,6 @@ are stored, so that they are deployed within the API at startup.
   are stored and `--models` is/are the name/s of the model/s that will be served on the startup, including both an alias 
   which will be the API endpoint of that concrete model and the filename of that model, with format `endpoint=model_name.mar`.
 
-  ...
-
   __Note__: another procedure can be deploying TorchServe first using the command 
   `torchserve --start --ncs --model-store model-store` (without defining the models) and then registering the model
   using the Management API via a HTTP POST request like `curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"` 
@@ -206,6 +209,8 @@ specifies `inference_address` including the port.
   __Note__: If the status of the health-check request was `"Unhealthy"`, you should check the logs either from the console from where
   you did run the TorchServe deployment or from the `logs/` directory that is created automatically while deploying TorchServe from
   the same directory where you deployed it.
+
+  ---
 
 __4. Stop TorchServe:__ once you are done and you no longer need TorchServe, you can gracefully shut it down with the
 following command:
@@ -288,3 +293,10 @@ __Note__: that to execute the piece of sample code above you will need more requ
   ```bash
   pip install opencv-python pillow requests --upgrade
   ```
+  
+## :computer: Credits
+
+Credits for the dataset slice go to @mrdbourke, as he nicely provided me the information via Twitter DM.
+
+Credits for the tips on how to serve a PyTorch transfer learningn model using TorchServe go to 
+@prashantsail as he properly explained in [this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
