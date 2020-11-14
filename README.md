@@ -41,21 +41,89 @@ the SOTA when it comes to image classification.
 In this case, as we want to serve a PyTorch model, we will be using [PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
 and more concretely, ResNet18, where the 18 stands for the number of layers that it contains.
 
-  ---
-
 TODO: Explain how to load the model and some considerations towards preparing the model for TorchServe.
 
 TODO: Regarding the training process, ...
 
 TODO: Finally, in order to dump ...
 
-TODO: Include NVIDIA specs & some information regarding the GPU usage ...
+Once the state_dict has been generated from the pre-trained model, you need to make sure that it can be loaded properly.
+But before checking that, you need to define the model's architecture as a Python class, so that the pre-trained set of 
+weights is being loaded into that architecture, which means that the keys should match between the model and the weights.
 
-TODO: Next step is to prepare the model files as the `state_dict` previosuly dumped as a .pth file will be loaded into
-a model, which obviously must have the same architecture as the trained model ...
+As we used transfer learning from a pre-trained model and we just modified the last fully connected layer (fc), we need to
+modify the original ResNet18 class. You can find the original class for this model at 
+[torchvision/models/segmentation](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L268-L277)
+and for the rest of the PyTorch pre-trained models at [torchvision/models](https://github.com/pytorch/vision/tree/master/torchvision/models).
+
+The code for the ResNet18 model looks like:
+
+```python
+def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> ResNet:
+    r"""ResNet-18 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
+                   **kwargs)
+```
+
+Which translated to our model file it should look like:
+
+```python
+import torch.nn as nn
+
+from torchvision.models.resnet import ResNet, BasicBlock
+
+
+class ImageClassifier(ResNet):
+    def __init__(self):
+        super(ImageClassifier, self).__init__(BasicBlock, [2,2,2,2], num_classes=10)
+
+        self.fc = nn.Sequential(
+            nn.Linear(512 * BasicBlock.expansion, 128),
+            nn.ReLU(),
+            nn.Dropout(.2),
+            nn.Linear(128, 10),
+            nn.LogSoftmax(dim=1)
+        )
+```
+
+As you can see we are creating a new class named `ImageClassifier` which inherits from the base `ResNet` class defined in
+that file. We then need to initialize that class with our architecture, which in this case is the same one as the ResNet18,
+including the `BasicBlock`, specifying the ResNet18 layers `[2,2,2,2]` and then we modify the number of classes, which for 
+our case is 10 as we previously mentioned.
+
+Finally, so as to make the state_dict match with the model class, we need to override the `self.fc` layer, which is the last
+layer of the network. As we use that sequential layer while training the model, the final weights have been optimized for our
+dataset over that layer, so just overriding it we will get the model's architecture with our modifications.
+
+Then in order to check that the model can be loaded into the `ImageClassifier` class, you should just need to define the class and
+load the weights using the following piece of code:
+
+```python
+model = ImageClassifier()
+model.load_state_dict(torch.load("../foodnet/foodnet_resnet18.pth"))
+```
+
+Whose expected output should be `<All keys matched successfully>`.
 
 You can find more Image Classification pre-trained PyTorch models at 
 [PyTorch Image Classification Models](https://pytorch.org/docs/stable/torchvision/models.html#classification).
+
+__Note__: the model has been trained on a NVIDIA GeForce GTX 1070 8GB GPU using CUDA 11. If you want to get you GPU specs, just
+use the `nvidia-smi` command on your console, but make sure that you have your NVIDIA drivers properly installed. So as 
+to check whether PyTorch is using the GPU you can just use the following piece of code which will tell you whether there's
+a GPU (or more) available or not and, if so, which is the name of that device depending on its ID if there's more than 
+one GPU.
+
+```python
+import torch
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.cuda.get_device_name(0)
+```
 
 ---
 
