@@ -46,9 +46,17 @@ If you have any problems regarding the PyTorch installation, visit [PyTorch - Ge
 
 ## :open_file_folder: Dataset
 
-TODO: explain what does the dataset contain
+The dataset that is going to be used to train the image classification model is 
+[Food101](https://www.tensorflow.org/datasets/catalog/food101), but not the complete version of it,
+just a slice of 10 classes, which is more or less the 10% of the dataset.
 
-TODO: include an overview with a sample image per class
+This dataset consists of 101 food categories, with 101'000 images. For each class, 250 manually 
+reviewed test images are provided as well as 750 training images. On purpose, the training images 
+were not cleaned, and thus still contain some amount of noise. This comes mostly in the form of 
+intense colors and sometimes wrong labels. All images were rescaled to have a maximum side length 
+of 512 pixels.
+
+![](https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/data.jpg)
 
 ---
 
@@ -58,14 +66,56 @@ As the modelling is not the most relevant part/section that aims to be covered a
 will just be using transfer learning from a pre-trained [ResNet](https://arxiv.org/abs/1512.03385) as it is 
 the SOTA when it comes to image classification.
 
-In this case, as we want to serve a PyTorch model, we will be using [PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
+In this case, as we want to serve a PyTorch model, we will be using 
+[PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
 and more concretely, ResNet18, where the 18 stands for the number of layers that it contains.
 
-TODO: Explain how to load the model and some considerations towards preparing the model for TorchServe.
+As we are going to use transfer learning from a pre-trained PyTorch model, we will load the ResNet18 model
+and freeze it's weights using the following piece of code:
 
-TODO: Regarding the training process, ...
+```python
+from torchvision import models
 
-TODO: Finally, in order to dump ...
+model = models.resnet18(pretrained=True)
+model.eval()
+
+for param in model.parameters():
+    param.requires_grad = False
+```
+
+Once loaded, we need to update the `fc` layer, which stands for fully connected and it's the last 
+layer of the model, and over the one that the weights will be calculated to optimize the network 
+for our dataset.
+
+In this concrete case we included the following sequential layer:
+
+```python
+import torch.nn as nn
+
+sequential_layer = nn.Sequential(
+    nn.Linear(model.fc.in_features, 128),
+    nn.ReLU(),
+    nn.Dropout(.2),
+    nn.Linear(128, 10),
+    nn.LogSoftmax(dim=1)
+)
+
+model.fc = sequential_layer
+```
+
+Then we will train the model with the TRAIN dataset which contains 750 images and that has been 
+splitted as 80%-20% for training and validation, respectively. And tested over the TEST dataset 
+which contains 2500 images.
+
+__Note__: for more details regarding the model training process, feel free to check it at 
+[notebooks/transfer-learning.ipynb]()
+
+After training the model you just need to dump the state_dict into a `.pth` file, which contains
+the pre-trained set of weights, with the following piece of code:
+
+```python
+torch.save(model.state_dict(), '../foodnet/foodnet_resnet18.pth')
+```
 
 Once the state_dict has been generated from the pre-trained model, you need to make sure that it can be loaded properly.
 But before checking that, you need to define the model's architecture as a Python class, so that the pre-trained set of 
