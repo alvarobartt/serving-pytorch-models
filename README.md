@@ -25,14 +25,29 @@ __WARNING__: TorchServe is experimental and subject to change.
 
 ## :hammer_and_wrench: Requirements
 
-- torch, torchvision, torchserve, torch-model-archiver
-- Java, JDK 11
+First of all you will need to make sure that you have Java JDK 11 installed, as it is
+required by `torchserve` while deploying the model since it is exposing the APIs using Java.
+
+```bash
+sudo apt install --no-install-recommends -y openjdk-11-jre-headless
+```
+
+Then you can proceed with the installation of the PyTorch Python packages required for 
+both training and serving the model. 
+
+```bash
+pip install torch torchvision -f https://download.pytorch.org/whl/torch_stable.html
+pip install torchserve torch-model-archiver
+```
+
+If you have any problems regarding the PyTorch installation, visit [PyTorch - Get Started Locally](https://pytorch.org/get-started/locally/)
 
 ---
 
 ## :open_file_folder: Dataset
 
 TODO: explain what does the dataset contain
+
 TODO: include an overview with a sample image per class
 
 ---
@@ -181,10 +196,14 @@ are stored, so that they are deployed within the API at startup.
   are stored and `--models` is/are the name/s of the model/s that will be served on the startup, including both an alias 
   which will be the API endpoint of that concrete model and the filename of that model, with format `endpoint=model_name.mar`.
 
-  __Note__: another procedure can be deploying TorchServe first using the command 
-  `torchserve --start --ncs --model-store model-store` (without defining the models) and then registering the model
-  using the Management API via a HTTP POST request like `curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"` 
-  and later you can also scale the workers using `curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"`.
+  __Note__: another procedure can be deploying TorchServe first (without defining the models), then registering the model using
+  the Management API and then scaling the number of workers (if needed).
+  
+  ```bash
+  torchserve --start --ncs --model-store model-store
+  curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"
+  curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
+  ```
 
   More information regarding `torchserve` available at [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
 
