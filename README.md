@@ -56,7 +56,7 @@ were not cleaned, and thus still contain some amount of noise. This comes mostly
 intense colors and sometimes wrong labels. All images were rescaled to have a maximum side length 
 of 512 pixels.
 
-![](https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/doc/images/data.jpg)
+![](https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/data.jpg)
 
 ---
 
@@ -362,7 +362,9 @@ __Note__: that to execute the piece of sample code above you will need more requ
   ```bash
   pip install opencv-python pillow requests --upgrade
   ```
-  
+
+---
+
 ## :computer: Credits
 
 Credits for the dataset slice go to @mrdbourke, as he nicely provided me the information via Twitter DM.
