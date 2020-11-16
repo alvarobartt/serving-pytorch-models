@@ -6,6 +6,8 @@ jobs:
     container: docker://dvcorg/cml-py3:latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          lfs: true
       - name: cml_run
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

@@ -47,13 +47,10 @@ image_processing = T.Compose([
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-with open("model/foodnet_resnet18.pth", "rb") as fd:
-    buf = io.BytesIO(fd.read())
-
 results = list()
 
 model = ImageClassifier()
-model.load_state_dict(torch.load(buf))
+model.load_state_dict(torch.load("model/foodnet_resnet18.pth"))
 
 for key, value in ID2LABEL.items():
     path = f"{TEST_DIR}/{value}"
