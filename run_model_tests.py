@@ -46,7 +46,9 @@ image_processing = T.Compose([
 ])
 
 try:
-    dat = torch.load("model/foodnet_resnet18.pth")
+    import io
+    with open("model/foodnet_resnet18.pth", "rb") as fd:
+        buf = io.BytesIO(fd.read())
 except:
     print("Error...")
 
