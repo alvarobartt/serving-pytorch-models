@@ -46,6 +46,7 @@ image_processing = T.Compose([
 ])
 
 print(os.getcwd())
+print(os.listdir(f"{os.getcwd()}/model"))
 
 model = ImageClassifier()
 model.load_state_dict(torch.load("model/foodnet_resnet18.pth"))
