@@ -1,9 +1,5 @@
 name: perturbation-test
-on: 
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: [push]
 jobs:
   run:
     runs-on: [ubuntu-latest]
@@ -16,8 +12,9 @@ jobs:
         run: |
 
           # Your ML workflow goes here
-          pip install -r requirements.txt
-          python tests/test_model.py
+          pip install torch torchvision -f https://download.pytorch.org/whl/torch_stable.html
+          pip install pillow
+          python run_model_tests.py
 
           # Write your CML report
           cat results.txt >> report.md
