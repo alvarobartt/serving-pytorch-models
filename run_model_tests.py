@@ -4,8 +4,6 @@ from random import choice
 
 from PIL import Image
 
-import pandas as pd
-
 import torch
 import torch.nn as nn
 
