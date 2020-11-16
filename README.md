@@ -358,7 +358,7 @@ req = requests.post("http://localhost:8080/predictions/foodnet", data=image_as_b
 if req.status_code == 200: res = req.json()
 ```
 
-__Note__: that to execute the piece of sample code above you will need more requirements than the ones specified in the
+__Note__: that to execute the sample piece of code above you will need more requirements than the ones specified in the
 [Requirements section](#hammer_and_wrench-requirements) so just run the following command so as to install them:
 
   ```bash
