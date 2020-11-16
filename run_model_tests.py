@@ -45,26 +45,31 @@ image_processing = T.Compose([
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-print(os.getcwd())
-print(os.listdir(f"{os.getcwd()}/model"))
-
-model = ImageClassifier()
-model.load_state_dict(torch.load("model/foodnet_resnet18.pth"))
+try:
+    dat = torch.load("model/foodnet_resnet18.pth")
+except:
+    print("Error...")
 
 results = list()
 
-for key, value in ID2LABEL.items():
-    path = f"{TEST_DIR}/{value}"
-    random_image = choice(os.listdir(path))
-    random_image = Image.open(f"{path}/{random_image}")
-    random_image = image_processing(random_image)
-    
-    with torch.no_grad():
-        outputs = model(random_image.unsqueeze(0))
-        _, preds = torch.max(outputs, 1)
-        predicted_class = ID2LABEL[preds.numpy()[0]]
+try:
+    model = ImageClassifier()
+    model.load_state_dict(torch.load("model/foodnet_resnet18.pth"))
 
-    results.append(f"{path} image was {value}, but the model predicted {predicted_class}")
+    for key, value in ID2LABEL.items():
+        path = f"{TEST_DIR}/{value}"
+        random_image = choice(os.listdir(path))
+        random_image = Image.open(f"{path}/{random_image}")
+        random_image = image_processing(random_image)
+        
+        with torch.no_grad():
+            outputs = model(random_image.unsqueeze(0))
+            _, preds = torch.max(outputs, 1)
+            predicted_class = ID2LABEL[preds.numpy()[0]]
+
+        results.append(f"{path} image was {value}, but the model predicted {predicted_class}")
+except:
+    print("Another error...")
 
 with open('results.txt', 'w') as f:
     f.write('## Results')
