@@ -12,8 +12,8 @@ jobs:
         run: |
 
           # Your ML workflow goes here
-          pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-          pip install pillow
+          sudo -H pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+          sudo -H pip install pillow
           python run_model_tests.py
 
           # Write your CML report
