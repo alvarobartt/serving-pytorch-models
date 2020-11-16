@@ -50,7 +50,7 @@ image_processing = T.Compose([
 results = list()
 
 model = ImageClassifier()
-model.load_state_dict(torch.load("model/foodnet_resnet18.pth"))
+model.load_state_dict(torch.load("model/foodnet_resnet18.pth"), map_location=torch.device('cpu'))
 
 for key, value in ID2LABEL.items():
     path = f"{TEST_DIR}/{value}"
