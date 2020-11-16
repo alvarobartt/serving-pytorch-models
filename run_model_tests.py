@@ -45,6 +45,8 @@ image_processing = T.Compose([
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
+print(os.getcwd())
+
 model = ImageClassifier()
 model.load_state_dict(torch.load("model/foodnet_resnet18.pth"))
 
@@ -56,7 +58,6 @@ for key, value in ID2LABEL.items():
     random_image = Image.open(f"{path}/{random_image}")
     random_image = image_processing(random_image)
     
-
     with torch.no_grad():
         outputs = model(random_image.unsqueeze(0))
         _, preds = torch.max(outputs, 1)
