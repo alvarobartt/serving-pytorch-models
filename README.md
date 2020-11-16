@@ -57,7 +57,7 @@ were not cleaned, and thus still contain some amount of noise. This comes mostly
 intense colors and sometimes wrong labels. All images were rescaled to have a maximum side length 
 of 512 pixels.
 
-![](https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/data.jpg)
+![](https://raw.githubusercontent.com/alvarobartt/serving-pytorch-models/master/images/data.jpg)
 
 ---
 
