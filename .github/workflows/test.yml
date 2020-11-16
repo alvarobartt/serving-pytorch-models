@@ -5,6 +5,11 @@ jobs:
     runs-on: [ubuntu-latest]
     container: docker://dvcorg/cml-py3:latest
     steps:
+      - name: git_lfs_install
+        run: |
+          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+          sudo apt-get install git-lfs
+          git lfs install
       - uses: actions/checkout@v2
         with:
           lfs: true
