@@ -1,4 +1,4 @@
-name: perturbation-test
+name: sanity-checks
 on: [push]
 jobs:
   run:
@@ -20,9 +20,10 @@ jobs:
 
           # Your ML workflow goes here
           sudo -H pip install torch==1.7.0 torchvision==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
-          sudo -H pip install pillow
+          sudo -H pip install pillow pandas
           python run_model_tests.py
 
           # Write your CML report
+          echo "## Sanity Checks" >> report.md
           cat results.txt >> report.md
           cml-send-comment report.md
