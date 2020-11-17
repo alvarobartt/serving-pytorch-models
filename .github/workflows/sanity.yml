@@ -19,9 +19,8 @@ jobs:
         run: |
 
           # Your ML workflow goes here
-          sudo -H pip install torch==1.7.0 torchvision==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
-          sudo -H pip install pillow pandas
-          python tests/run_model_tests.py
+          sudo -H pip install -r tests/requirements.txt
+          python tests/run_sanity_checks.py
 
           # Write your CML report
           echo "## Sanity Checks" >> report.md

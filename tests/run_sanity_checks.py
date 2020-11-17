@@ -1,5 +1,4 @@
 import io
-import json
 import os
 from random import choice
 
@@ -7,8 +6,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from PIL import Image
-from torchvision import transforms as T
 from torch.utils.data import DataLoader
+from torchvision import transforms as T
 from torchvision.datasets import ImageFolder
 from torchvision.models.resnet import BasicBlock, ResNet
 
@@ -61,6 +60,11 @@ sanity_loader = DataLoader(
 
 model = ImageClassifier()
 model.load_state_dict(torch.load("model/foodnet_resnet18.pth", map_location=torch.device('cpu')))
+model.eval();
+
+criterion = nn.CrossEntropyLoss()
+
+running_corrects, running_loss = .0, .0
 
 for inputs, labels in sanity_loader:
     inputs, labels = inputs.to('cpu'), labels.to('cpu')
@@ -77,7 +81,7 @@ loss = running_loss / len(sanity_dataset)
 acc = running_corrects.double() / len(sanity_dataset)
 
 with open("results.txt", "w") as f:
-    f.write(pd.DataFrame({'accuracy': acc, 'loss': loss}).to_markdown())
+    f.write(pd.DataFrame([{'accuracy': acc, 'loss': loss}]).to_markdown())
 
 # for key, value in ID2LABEL.items():
 #     path = f"{TEST_DIR}/{value}"
