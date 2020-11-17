@@ -369,7 +369,9 @@ __Note__: that to execute the sample piece of code above you will need more requ
 
 ## :computer: Credits
 
-Credits for the dataset slice go to @mrdbourke, as he nicely provided me the information via Twitter DM.
+Credits for the dataset slice go to [@mrdbourke](https://github.com/mrdbourke), as he nicely provided 
+me the information via Twitter DM.
 
 Credits for the tips on how to serve a PyTorch transfer learningn model using TorchServe go to 
-@prashantsail as he properly explained in [this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
+[@prashantsail](https://github.com/prashantsail) as he properly explained in 
+[this comment](https://github.com/pytorch/serve/issues/620#issuecomment-674971664).
