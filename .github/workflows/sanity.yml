@@ -1,0 +1,28 @@
+name: sanity-checks
+on: [push]
+jobs:
+  run:
+    runs-on: [ubuntu-latest]
+    container: docker://dvcorg/cml-py3:latest
+    steps:
+      - name: git_lfs_install
+        run: |
+          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+          sudo apt-get install git-lfs
+          git lfs install
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: cml_run
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          # Your ML workflow goes here
+          sudo -H pip install -r tests/requirements.txt
+          python tests/run_sanity_checks.py
+
+          # Write your CML report
+          echo "## Sanity Checks" >> report.md
+          cat results.txt >> report.md
+          cml-send-comment report.md
