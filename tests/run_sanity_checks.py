@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision.models.resnet import BasicBlock, ResNet
 
-TEST_DIR = "dataset/test"
+SANITY_DIR = "dataset/sanity"
 
 ID2LABEL = {
     0: 'chicken_curry',
@@ -47,14 +47,14 @@ image_processing = T.Compose([
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-test_dataset = ImageFolder(
-    root=test_data_path,
-    transform=val_transform
+sanity_dataset = ImageFolder(
+    root=SANITY_DIR,
+    transform=image_processing
 )
 
-test_loader = DataLoader(
-    test_dataset,
-    batch_size=16,
+sanity_loader = DataLoader(
+    sanity_dataset,
+    batch_size=8,
     num_workers=0,
     shuffle=False
 )
@@ -62,8 +62,8 @@ test_loader = DataLoader(
 model = ImageClassifier()
 model.load_state_dict(torch.load("model/foodnet_resnet18.pth", map_location=torch.device('cpu')))
 
-for inputs, labels in test_loader:
-    inputs, labels = inputs.to(device), labels.to(device)
+for inputs, labels in sanity_loader:
+    inputs, labels = inputs.to('cpu'), labels.to('cpu')
 
     with torch.no_grad():
         outputs = model(inputs)
@@ -73,8 +73,8 @@ for inputs, labels in test_loader:
     running_loss += loss.item() * inputs.size(0)
     running_corrects += torch.sum(preds == labels)
     
-loss = running_loss / len(test_dataset)
-acc = running_corrects.double() / len(test_dataset)
+loss = running_loss / len(sanity_dataset)
+acc = running_corrects.double() / len(sanity_dataset)
 
 with open("results.txt", "w") as f:
     f.write(pd.DataFrame({'accuracy': acc, 'loss': loss}).to_markdown())
