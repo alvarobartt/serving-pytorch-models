@@ -30,19 +30,18 @@ RUN pip install -U pip setuptools
 
 RUN pip install --no-cache-dir torch torchvision torchserve
 
-RUN useradd -m model-server \
-    && mkdir -p /home/model-server/tmp
+RUN useradd -m model-server
 
 COPY dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
 COPY config.properties /home/model-server/config.properties
 COPY model-store /home/model-server/model-store
 
 RUN chmod +x /usr/local/bin/dockerd-entrypoint.sh \
+    && mkdir -p /home/model-server/tmp \
     && chown -R model-server /home/model-server \
     && chown -R model-server /home/venv
 
-RUN mkdir /home/model-server/model-store \
-    && chown -R model-server /home/model-server/model-store \
+RUN chown -R model-server /home/model-server/model-store \
     && cd /home/model-server/model-store
 
 EXPOSE 8080 8081 8082
@@ -50,5 +49,5 @@ EXPOSE 8080 8081 8082
 USER model-server
 WORKDIR /home/model-server
 ENV TEMP=/home/model-server/tmp
-ENTRYPOINT ["usr/local/bin/dockerd-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
 CMD ["serve"]
