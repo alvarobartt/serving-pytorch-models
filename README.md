@@ -311,10 +311,10 @@ In order to reproduce the TorchServe deployment in an Ubuntu Docker image, you s
 
 ```bash
 docker build -t ubuntu-torchserve:latest deployment/docker/
-docker run --rm --name torchserve_docker -p8080:8080 -p8081:8081 -p8082:8082 ubuntu-torchserve:latest torchserve --model-store deployment/model-store/ --models foodnet=foodnet_resnet18.mar
+docker run --rm --name torchserve_docker -p8080:8080 -p8081:8081 -p8082:8082 ubuntu-torchserve:latest torchserve --model-store /home/model-server/model-store/ --models foodnet=foodnet_resnet18.mar
 ```
 
-For more information regarding the Docker deployment, please visit [docker/README.md](docker/README.md).
+For more information regarding the Docker deployment, please visit [deployment/docker/README.md](docker/README.md).
 
 ---
 
