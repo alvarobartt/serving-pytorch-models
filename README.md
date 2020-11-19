@@ -116,7 +116,7 @@ After training the model you just need to dump the state_dict into a `.pth` file
 the pre-trained set of weights, with the following piece of code:
 
 ```python
-torch.save(model.state_dict(), '../foodnet/foodnet_resnet18.pth')
+torch.save(model.state_dict(), '../model/foodnet_resnet18.pth')
 ```
 
 Once the state_dict has been generated from the pre-trained model, you need to make sure that it can be loaded properly.
@@ -177,7 +177,7 @@ load the weights using the following piece of code:
 
 ```python
 model = ImageClassifier()
-model.load_state_dict(torch.load("../foodnet/foodnet_resnet18.pth"))
+model.load_state_dict(torch.load("../model/foodnet_resnet18.pth"))
 ```
 
 Whose expected output should be `<All keys matched successfully>`.
@@ -212,10 +212,16 @@ generated with `torch-model-archiver`. So on, in order to do so, you will need t
 ```bash
 torch-model-archiver --model-name foodnet_resnet18 \
                    --version 1.0 \
-                   --model-file foodnet/model.py \
-                   --serialized-file foodnet/foodnet_resnet18.pth \
-                   --handler foodnet/handler.py \
-                   --extra-files foodnet/index_to_name.json
+                   --model-file model/model.py \
+                   --serialized-file model/foodnet_resnet18.pth \
+                   --handler model/handler.py \
+                   --extra-files model/index_to_name.json
+```
+
+Once generated you will need to place the MAR file into the `deployment/model-store` directory as it follows:
+
+```bash
+mv foodnet_resnet18.mar deployment/model-store/
 ```
 
 Where the flag `--model-name` stands for the name that the generated MAR servable file will have, the `--version` is optional
