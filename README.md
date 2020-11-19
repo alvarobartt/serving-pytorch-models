@@ -18,6 +18,7 @@ __WARNING__: TorchServe is experimental and subject to change.
 - [Dataset](#open_file_folder-dataset)
 - [Modelling](#robot-modelling)
 - [Deployment](#rocket-deployment)
+- [Docker](#whale2-docker)
 - [Usage](#mage_man-usage)
 - [Credits](#computer-credits)
 
@@ -237,22 +238,23 @@ Inference API, Management API and Metrics API, deployed by default on `localhost
 ports 8080, 8081 and 8082, respectively. While deploying TorchServe, you can also specify the directory where the MAR files
 are stored, so that they are deployed within the API at startup.
 
-So on, the command to deploy the current MAR model stored under model-store/ is the following:
+So on, the command to deploy the current MAR model stored under `deployment/model-store/` is the following:
 
 ```bash
-torchserve --start --ncs --model-store model-store --models foodnet=foodnet_resnet18.mar
+torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store --models foodnet=foodnet_resnet18.mar
 ```
 
 Where the flag `--start` means that you want to start the TorchServe service (deploy the APIs), the flag `--ncs`
-means that you want to disable the snapshot feature (optional), `--model-store` is the directory where the MAR files
-are stored and `--models` is/are the name/s of the model/s that will be served on the startup, including both an alias 
+means that you want to disable the snapshot feature (optional), `--ts-config` to include the configuration file
+which is something optional too, `--model-store` is the directory where the MAR files are stored and 
+`--models` is(are) the name(s) of the model(s) that will be served on the startup, including both an alias 
 which will be the API endpoint of that concrete model and the filename of that model, with format `endpoint=model_name.mar`.
 
 __Note__: another procedure can be deploying TorchServe first (without defining the models), then registering the model using
 the Management API and then scaling the number of workers (if needed).
 
 ```bash
-torchserve --start --ncs --model-store model-store
+torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store
 curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"
 curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
 ```
@@ -302,8 +304,8 @@ bit more of time depending on your machine specs.
 In order to reproduce the TorchServe deployment in an Ubuntu Docker image, you should just use the following command:
 
 ```bash
-docker build -t ubuntu-torchserve:latest docker/
-docker run --rm --name torchserve_docker -p8080:8080 -p8081:8081 -p8082:8082 ubuntu-torchserve:latest torchserve --model-store model-store/ --models foodnet=foodnet_resnet18.mar
+docker build -t ubuntu-torchserve:latest deployment/docker/
+docker run --rm --name torchserve_docker -p8080:8080 -p8081:8081 -p8082:8082 ubuntu-torchserve:latest torchserve --model-store deployment/model-store/ --models foodnet=foodnet_resnet18.mar
 ```
 
 For more information regarding the Docker deployment, please visit [docker/README.md](docker/README.md).
