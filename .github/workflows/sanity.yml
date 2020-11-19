@@ -1,5 +1,9 @@
 name: sanity-checks
-on: [push]
+on:
+  push:
+    paths:
+      - model/**
+      - tests/**
 jobs:
   run:
     runs-on: [ubuntu-latest]
