@@ -273,7 +273,7 @@ If everything goes as expected, it should output the following response:
 
 ```json
 {
-"status": "Healthy"
+  "status": "Healthy"
 }
 ```
 
@@ -294,6 +294,19 @@ Then the next time you deploy TorchServe, it will take less time than the first 
 registered/loaded, as TorchServe keeps them cached under a `/tmp` directory so it won't need to load them again if neither the name nor 
 the version changed. On the other hand, if you register a new model, TorchServe will have to load it and it may take a little 
 bit more of time depending on your machine specs. 
+
+---
+
+## :whale2: Docker
+
+In order to reproduce the TorchServe deployment in an Ubuntu Docker image, you should just use the following command:
+
+```bash
+docker build -t ubuntu-torchserve:latest docker/
+docker run --rm --name torchserve_docker -p8080:8080 -p8081:8081 -p8082:8082 ubuntu-torchserve:latest torchserve --model-store model-store/ --models foodnet=foodnet_resnet18.mar
+```
+
+For more information regarding the Docker deployment, please visit [docker/README.md](docker/README.md).
 
 ---
 
