@@ -307,14 +307,20 @@ bit more of time depending on your machine specs.
 
 ## :whale2: Docker
 
-In order to reproduce the TorchServe deployment in an Ubuntu Docker image, you should just use the following command:
+In order to reproduce the TorchServe deployment in an Ubuntu Docker image, you should just use the following set of commands:
 
 ```bash
-docker build -t ubuntu-torchserve:latest deployment/docker/
-docker run --rm --name torchserve_docker -p8080:8080 -p8081:8081 -p8082:8082 ubuntu-torchserve:latest torchserve --model-store /home/model-server/model-store/ --models foodnet=foodnet_resnet18.mar
+docker build -t ubuntu-torchserve:latest deployment/
+docker run --rm --name torchserve_docker \
+           -p8080:8080 -p8081:8081 -p8082:8082 \
+           ubuntu-torchserve:latest \
+           torchserve --model-store /home/model-server/model-store/ --models foodnet=foodnet_resnet18.mar
 ```
 
-For more information regarding the Docker deployment, please visit [deployment/docker/README.md](docker/README.md).
+For more information regarding the Docker deployment, you should check TorchServe's 
+explanation and notes available at [pytorch/serve/docker](https://github.com/pytorch/serve/tree/master/docker), 
+as it also explains how to use their Docker image (instead of a clear Ubuntu one) and
+some tips regarding the production deployment of the models using TorchServe.
 
 ---
 
