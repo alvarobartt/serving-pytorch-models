@@ -90,22 +90,11 @@ for stack in stacks:
     true_label, pred_label = stack.tolist()
     conf_mat[true_label, pred_label] += 1
 
-# with open("confusion_matrix.txt", "w") as f:
-#     f.write(pd.DataFrame([{'accuracy': acc, 'loss': loss}]).to_markdown())
+with open("confusion_matrix.txt", "w") as f:
+    f.write(pd.DataFrame(conf_mat.numpy(), index=list(ID2LABEL.values()), columns=list(ID2LABEL.values())).to_markdown())
 
 loss = running_loss / len(sanity_dataset)
 acc = running_corrects.double() / len(sanity_dataset)
 
 with open("results.txt", "w") as f:
     f.write(pd.DataFrame([{'accuracy': acc, 'loss': loss}]).to_markdown())
-
-# for key, value in ID2LABEL.items():
-#     path = f"{TEST_DIR}/{value}"
-#     random_image = choice(os.listdir(path))
-#     random_image = Image.open(f"{path}/{random_image}")
-#     random_image = image_processing(random_image)
-    
-#     with torch.no_grad():
-#         outputs = model(random_image.unsqueeze(0))
-#         _, preds = torch.max(outputs, 1)
-#         predicted_class = ID2LABEL[preds.numpy()[0]]

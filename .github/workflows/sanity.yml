@@ -27,6 +27,9 @@ jobs:
           python tests/run_sanity_checks.py
 
           # Write your CML report
-          echo "## Sanity Checks" >> report.md
+          echo "## Accuracy & Loss" >> report.md
           cat results.txt >> report.md
+
+          echo "## Confusion Matrix" >> report.md
+          cat confusion_matrix.txt >> report.md
           cml-send-comment report.md
