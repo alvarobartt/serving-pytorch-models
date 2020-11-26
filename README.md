@@ -10,6 +10,8 @@ slice of a well known food dataset, named [Food101](https://www.tensorflow.org/d
 
 __WARNING__: TorchServe is experimental and subject to change.
 
+![sanity-checks](https://github.com/alvarobartt/serving-pytorch-models/workflows/sanity-checks/badge.svg?branch=master)
+
 ---
 
 ## :closed_book: Table of Contents
