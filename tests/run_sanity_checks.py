@@ -55,7 +55,7 @@ sanity_loader = DataLoader(
     sanity_dataset,
     batch_size=8,
     num_workers=0,
-    shuffle=False
+    shuffle=True
 )
 
 model = ImageClassifier()
@@ -65,18 +65,34 @@ model.eval();
 criterion = nn.CrossEntropyLoss()
 
 running_corrects, running_loss = .0, .0
+all_preds = torch.Tensor()
+shuffled_labels = torch.Tensor()
 
 for inputs, labels in sanity_loader:
     inputs, labels = inputs.to('cpu'), labels.to('cpu')
+
+    shuffled_labels = torch.cat((shuffled_labels, labels), dim=0)
 
     with torch.no_grad():
         outputs = model(inputs)
         _, preds = torch.max(outputs, 1)
         loss = criterion(outputs, labels)
 
+    all_preds = torch.cat((all_preds, preds), dim=0)
+
     running_loss += loss.item() * inputs.size(0)
     running_corrects += torch.sum(preds == labels)
-    
+
+stacks = torch.stack((shuffled_labels.type(torch.int32), all_preds.type(torch.int32)), dim=1)
+conf_mat = torch.zeros(len(ID2LABEL), len(ID2LABEL), dtype=torch.int32)
+
+for stack in stacks:
+    true_label, pred_label = stack.tolist()
+    conf_mat[true_label, pred_label] += 1
+
+# with open("confusion_matrix.txt", "w") as f:
+#     f.write(pd.DataFrame([{'accuracy': acc, 'loss': loss}]).to_markdown())
+
 loss = running_loss / len(sanity_dataset)
 acc = running_corrects.double() / len(sanity_dataset)
 
