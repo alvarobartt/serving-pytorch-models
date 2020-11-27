@@ -10,19 +10,34 @@ jobs:
     runs-on: [ubuntu-latest]
     container: docker://dvcorg/cml-py3:latest
     steps:
-      - name: git_lfs_install
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Git LFS
         run: |
           curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
           sudo apt-get install git-lfs
           git lfs install
-      - uses: actions/checkout@v2
+
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore LFS cache
+        uses: actions/cache@v2
+        id: lfs-cache
         with:
-          lfs: true
-      - name: cml_run
+          path: |
+            deployment/model-store/**
+            model/*.pth
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
+
+      - name: Git LFS Pull
+        run: git lfs pull
+
+      - name: Run CML
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
-
           # Your ML workflow goes here
           sudo -H pip install -r tests/requirements.txt
           python tests/run_sanity_checks.py
