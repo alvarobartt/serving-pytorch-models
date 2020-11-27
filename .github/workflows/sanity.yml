@@ -2,6 +2,7 @@ name: sanity-checks
 on:
   push:
     paths:
+      - .github/workflows/sanity.yml
       - model/**
       - tests/**
 jobs:
