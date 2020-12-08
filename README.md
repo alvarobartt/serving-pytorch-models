@@ -39,8 +39,14 @@ Then you can proceed with the installation of the PyTorch Python packages requir
 both training and serving the model. 
 
 ```bash
-pip install torch torchvision -f https://download.pytorch.org/whl/torch_stable.html
-pip install torchserve torch-model-archiver
+pip install torch==1.7.0+cpu torchvision==0.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+pip install torchserve==0.2.0 torch-model-archiver==0.2.0
+```
+
+Or you can also install them from the `requirements.txt` file as it follows:
+
+```bash
+pip install -r requirements.txt
 ```
 
 If you have any problems regarding the PyTorch installation, visit 
