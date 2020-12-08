@@ -28,7 +28,7 @@ RUN update-alternatives --install /usr/local/bin/pip pip /usr/local/bin/pip3 1
 
 RUN pip install -U pip setuptools
 
-RUN pip install --no-cache-dir torch torchvision torchserve
+RUN pip install --no-cache-dir torch==1.7.0+cpu torchvision==0.8.1+cpu torchserve==0.2.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 RUN useradd -m model-server
 
