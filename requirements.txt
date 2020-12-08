@@ -1,0 +1,5 @@
+--find-links=https://download.pytorch.org/whl/torch_stable.html
+torch==1.7.0+cpu
+torchvision==0.8.1+cpu
+torchserve==0.2.0
+torch-model-archiver==0.2.0
