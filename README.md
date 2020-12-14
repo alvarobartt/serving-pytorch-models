@@ -219,11 +219,11 @@ generated with `torch-model-archiver`. So on, in order to do so, you will need t
 
 ```bash
 torch-model-archiver --model-name foodnet_resnet18 \
-                   --version 1.0 \
-                   --model-file model/model.py \
-                   --serialized-file model/foodnet_resnet18.pth \
-                   --handler model/handler.py \
-                   --extra-files model/index_to_name.json
+                     --version 1.0 \
+                     --model-file model/model.py \
+                     --serialized-file model/foodnet_resnet18.pth \
+                     --handler model/handler.py \
+                     --extra-files model/index_to_name.json
 ```
 
 Once generated you will need to place the MAR file into the `deployment/model-store` directory as it follows:
