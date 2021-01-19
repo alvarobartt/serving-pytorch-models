@@ -80,16 +80,18 @@ tengan un tamaño máximo de 512 píxeles (bien de largo o bien de ancho).
 
 ## :robot: Modelado
 
-We will proceed with a transfer learning approach using [ResNet](https://arxiv.org/abs/1512.03385) as its backbone
-with a pre-trained set of weights trained on [ImageNet](http://www.image-net.org/), as it is the SOTA when it 
-comes to image classification.
+Comenzaremos con la creación de un modelo de _transfer learning_ a partir del _backbone_ [ResNet](https://arxiv.org/abs/1512.03385) 
+con un conjunto pre-entrenado de pesos, entrenado y evaluado con el conjunto de datos [ImageNet](http://www.image-net.org/), que
+es el estado del arte en lo que a clasificación de imágenes se refiere.
 
-In this case, as we want to serve a PyTorch model, we will be using 
-[PyTorch's implementation of ResNet](https://pytorch.org/hub/pytorch_vision_resnet/)
-and more concretely, ResNet18, where the 18 stands for the number of layers that it contains.
+En este caso, queremos servir un modelo de PyTorch por lo que partiremos de 
+[la implementación de ResNet de PyTorch](https://pytorch.org/hub/pytorch_vision_resnet/) y, más concretamente,
+ResNet18, que es la implementación de ResNet que contiene 18 capas convolucionales.
 
-As we are going to use transfer learning from a pre-trained PyTorch model, we will load the ResNet18 model
-and freeze it's weights using the following piece of code:
+Por tanto, cargaremos dicho modelo a partir de los pesos pre-entrenados desde el Hub de PyTorch y los congelaremos puesto 
+que no nos interesa modificarlos dado que la idea del _transfer learning_ es que ya se han ajustado para obtener el mejor
+resultado posible sobre el conjunto de datos ImageNet. Para cargar el modelo de PyTorch desde el Hub podemos utilizar el siguiente
+fragmento de código:
 
 ```python
 from torchvision import models
@@ -101,12 +103,11 @@ for param in model.parameters():
     param.requires_grad = False
 ```
 
-Once loaded, we need to update the `fc` layer, which stands for fully connected and it's the last 
-layer of the model, and over the one that the weights will be calculated to optimize the network 
-for our dataset.
-
-En este caso concreto, incluimos una capa secuencial que se añadirá tras las capas convolucionales
-del modelo original. Así la capa secuencial incluida es la que se muestra en el siguiente bloque de código:
+Una vez cargado el modelo, necesitamos actualizar la capa `fc`, cuyas siglas del inglés significan _Fully Connected_, y
+es la última capa del modelo que define las neuronas de salida. En este caso concreto, incluimos una capa 
+secuencial que se añadirá tras las capas convolucionales del modelo original, dado que el objetivo es optimizar los pesos
+de dicha capa para obtener los mejores resultados sobre el conjunto de datos de evaluación que estamos utilizando. Así 
+la capa secuencial incluida es la que se muestra en el siguiente bloque de código:
 
 ```python
 import torch.nn as nn
@@ -122,30 +123,33 @@ sequential_layer = nn.Sequential(
 model.fc = sequential_layer
 ```
 
-Then we will train the model with the TRAIN dataset which contains 750 images and that has been 
-splitted as 80%-20% for training and validation, respectively. And tested over the TEST dataset 
-which contains 2500 images.
+Tras determinar la arquitectura de la red, se procederá a entrenar dicho modelo con el conjunto de datos de
+entrenamiento que contiene 750 imágenes y que ha sido divido en dos sub-conjuntos, uno para el entrenamiento y uno 
+para la validación con una separación del 80-20%, respectivamente. Dicha separación se realiza para poder estimar
+durante el entrenamiento del modelo cómo se comportará el modelo ante ejemplos no vistos previamente y, por tanto, 
+para poder estimar como funcionará el modelo cuando se le pase el conjunto de prueba que contiene 2500 imágenes.
 
-__Note__: for more details regarding the model training process, feel free to check it at 
-[notebooks/transfer-learning.ipynb](notebooks/transfer-learning.ipynb)
+__Nota__: para más detalles en lo que a la creación y entrenamiento del modelo de _transfer learning_ se refiere, puedes
+observar el código desarrollado en [notebooks/transfer-learning.ipynb](notebooks/transfer-learning.ipynb) a modo de ejemplo.
 
-After training the model you just need to dump the state_dict into a `.pth` file, which contains
-the pre-trained set of weights, with the following piece of code:
+Tras entrenar el modelo se procederá a exportar el modelo desde el _state\_dict_ a un fichero ".pth", el cual 
+contiene el conjunto pre-entrenado de pesos que más adelante se podrá cargar de nuevo, con el código mostrado 
+a continuación:
 
 ```python
 torch.save(model.state_dict(), '../model/foodnet_resnet18.pth')
 ```
 
-Once the state_dict has been generated from the pre-trained model, you need to make sure that it can be loaded properly.
-But before checking that, you need to define the model's architecture as a Python class, so that the pre-trained set of 
-weights is being loaded into that architecture, which means that the keys should match between the model and the weights.
+Tras generar fichero exportable del modelo ya entrenado, por lo que tenemos a asegurarnos de que se ha exportado 
+previamente, comprobando que se carga correctamente. Para poder realizar esta comprobación es importante que la 
+arquitectura del modelo esté propiamente definida, dado que se requiere de la arquitectura de la red para poder
+cargar los pesos pre-entrenados sobre dicha red.
 
-As we used transfer learning from a pre-trained model and we just modified the last fully connected layer (fc), we need to
-modify the original ResNet18 class. You can find the original class for this model at 
-[torchvision/models/segmentation](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L268-L277)
-and for the rest of the PyTorch pre-trained models at [torchvision/models](https://github.com/pytorch/vision/tree/master/torchvision/models).
-
-El código original de PyTorch del modelo ResNet18 es el siguiente:
+Puesto que hemos utilizado _transfer learning_ a partir de un modelo para clasificación de imágenes pre-entrenado pero
+modificando tanto la última capa como ajustado los pesos de la misma, tenemos que modificar también la arquitectura original 
+de ResNet18 definida en una clase de Python en 
+[torchvision/models/segmentation](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L268-L277). El 
+código original de PyTorch del modelo ResNet18 es el siguiente:
 
 ```python
 def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> ResNet:
@@ -180,17 +184,17 @@ class ImageClassifier(ResNet):
         )
 ```
 
-As you can see we are creating a new class named `ImageClassifier` which inherits from the base `ResNet` class defined in
-that file. We then need to initialize that class with our architecture, which in this case is the same one as the ResNet18,
-including the `BasicBlock`, specifying the ResNet18 layers `[2,2,2,2]` and then we modify the number of classes, which for 
-our case is 10 as we previously mentioned.
+De este modo creamos una nueva clase de Python llamada `ImageClassifier` que hereda de la clase base de `ResNet`
+definida por PyTorch en `torchvision`. Tenemos que inicializar dicha clase con nuestra arquitectura, puesto que modificamos
+la última capa de la arquitectura de la red original ResNet18, pero antes hay que definir la arquitectura base de ResNet18
+aunque modifiquemos el número clases de salida, que en este caso serán 10 clases de Food101 como se ha mencionado previamente.
 
-Finally, so as to make the state_dict match with the model class, we need to override the `self.fc` layer, which is the last
-layer of the network. As we use that sequential layer while training the model, the final weights have been optimized for our
-dataset over that layer, so just overriding it we will get the model's architecture with our modifications.
+Finalmente, tras definir la arquitectura base de ResNet18, procedemos a sobreescribir la capa `self.fc` con la definida previamente
+y sobre la cual hemos optimizado los pesos de la red para nuestro conjunto de datos. En este caso, la arquitectura resultante será la
+de ResNet pero con la última capa _Fully Connected_ modificada con la capa secuencial pre-definida.
 
-Then in order to check that the model can be loaded into the `ImageClassifier` class, you should just need to define the class and
-load the weights using the following piece of code:
+Así ahora ya podremos comprobar si los pesos del modelo que hemos exportado se pueden cargar propiamente en la clase
+`ImageClassifier` con el siguiente fragmento de código:
 
 ```python
 model = ImageClassifier()
@@ -331,7 +335,7 @@ despliegues de TorchServe, dichos modelos no requerirán ser registrados de nuev
 
 ## :whale2: Docker
 
-Con el fin de reproducir el despliegue de PyTorch, tal y como se ha descrito antes, en una imagen de Docker sobre Ubuntu, 
+Con el fin de reproducir el despliegue de TorchServe, tal y como se ha descrito antes, en una imagen de Docker sobre Ubuntu, 
 tendrás que asegurarte de tener Docker instalado en tu máquina y proceder con la ejecución de los comandos presentados a continuación:
 
 ```bash
