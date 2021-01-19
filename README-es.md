@@ -24,49 +24,55 @@ __AVISO__: TorchServe está aún en fase experimental y, por tanto, sujeto a cam
 - [Despliegue](#rocket-despliegue)
 - [Docker](#whale2-docker)
 - [Uso](#mage_man-uso)
-- [Créditos](#computer-creditos)
+- [Créditos](#computer-créditos)
 
 ---
 
 ## :hammer_and_wrench: Requisitos
 
-First of all you will need to make sure that you have Java JDK 11 installed, as it is
-required by `torchserve` while deploying the model since it is exposing the APIs using Java.
+Antes de comenzar, tendrás que asegurarte de que tienes todas las dependencias necesarias instaladas
+o, en caso de no tenerlas, instalarlas.
+
+Primero tienes que comprobar que tienes el JDK 11 de Java instalado, ya que es un requisito
+de `torchserve` a la hora de desplegar los modelos, ya que expone las APIs utilizando Java.
 
 ```bash
 sudo apt install --no-install-recommends -y openjdk-11-jre-headless
 ```
 
-Then you can proceed with the installation of the PyTorch Python packages required for 
-both training and serving the model. 
+A continuación, puedes proceder con la instalación de los paquetes de Python necesarios tanto para
+entrenar como para servir el modelo de PyTorch. De este modo, para instalarlo puedes utilizar el siguiente
+comando:
 
 ```bash
 pip install torch==1.7.0+cpu torchvision==0.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 pip install torchserve==0.2.0 torch-model-archiver==0.2.0
 ```
 
-Or you can also install them from the `requirements.txt` file as it follows:
+O bien puedes instalarlo desde el fichero de requisitos llamado `requirements.txt`, con el comando:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-If you have any problems regarding the PyTorch installation, visit 
-[PyTorch - Get Started Locally](https://pytorch.org/get-started/locally/)
+En caso de que tengas algún problema durante la instalación, visita
+[PyTorch - Get Started Locally](https://pytorch.org/get-started/locally/).
 
 ---
 
 ## :open_file_folder: Conjunto de Datos
 
-The dataset that is going to be used to train the image classification model is 
-[Food101](https://www.tensorflow.org/datasets/catalog/food101), but not the complete version of it,
-just a slice of 10 classes, which is more or less the 10% of the dataset.
+El conjunto de datos a utilizar para el entrenamiento del modelo para la clasifacación de imágenes
+en categorías es [Food101](https://www.tensorflow.org/datasets/catalog/food101). En este caso, dado que
+esto es una guía, no se utilizará el conjunto de datos completo, sino que se utilizará un fragmento reducido del mismo,
+en este caso, aproximadamente el 10% del total, abarcando tan solo 10 clases/categorías de las 101 disponibles.
 
-This dataset consists of 101 food categories, with 101'000 images. For each class, 250 manually 
-reviewed test images are provided as well as 750 training images. On purpose, the training images 
-were not cleaned, and thus still contain some amount of noise. This comes mostly in the form of 
-intense colors and sometimes wrong labels. All images were rescaled to have a maximum side length 
-of 512 pixels.
+El conjunto de datos original contiene imágenes de 101 categorías de comida distintas, con un total de 
+101000 imágenes. Así, para cada clase, hay 750 imágenes para el entrenamiento y 250 imágenes para la 
+evaluación del modelo. Las imágenes del conjunto de datos de evaluación han sido etiquetadas manualmente,
+mientras que en las de entrenamiento puede existir algo de ruido, principalmente en forma de imágenes con colores
+intensos o etiquetas erróneas. Por último mencionar que todas las imágenes han sido rescaladas con el fin de que
+tengan un tamaño máximo de 512 píxeles (bien de largo o bien de ancho).
 
 ![](https://raw.githubusercontent.com/alvarobartt/serving-pytorch-models/master/images/data.jpg)
 
@@ -336,16 +342,18 @@ some tips regarding the production deployment of the models using TorchServe.
 
 ## :mage_man: Uso
 
-Once you completed all the steps above, you can send a sample request to the deployed model so as to see its performance
-and make the inference. In this case, as the problem we are facing is an image classification problem, we will use a sample
-image as the one provided below and then send it as a file on the HTTP request's body as it follows:
+Una vez que has completado con éxito todos los pasos descritos previamente, puedes probar las APIs desplegadas por TorchServe
+enviando peticiones de ejemplo al modelo que está siendo servido. En este caso, dado que es un problema de clasificación de imágenes, 
+se utilizará una imagen que se pueda englobar en alguna de las categorías sobre las que hace la inferencia el modelo. De este modo, 
+una vez dispongamos de una imagen válida, podremos enviar la petición HTTP POST con el contenido de la imagen en el cuerpo de la 
+petición de la forma:
 
 ```bash
 wget https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/sample.jpg
 curl -X POST http://localhost:8080/predictions/foodnet -T sample.jpg
 ```
 
-Which should output something similar to:
+Que, si todo ha ido bien, debería de devolver una salida en formato JSON como la que se muestra a continuación:
 
 ```json
 {
@@ -368,16 +376,16 @@ assigning the identifiers with the class names so that the prediction is clearer
 
   ---
 
-The commands above translated into Python code looks like:
+Así los comandos presentados anteriormente se traducen en código de Python de la forma presentada en el siguiente bloque:
 
 ```python
-# Download a sample image from the available samples at alvarobartt/pytorch-model-serving/images
+# Descarga una imagen de ejemplo de alvarobartt/pytorch-model-serving/images
 import urllib
 url, filename = ("https://raw.githubusercontent.com/alvarobartt/pytorch-model-serving/master/images/sample.jpg", "sample.jpg")
 try: urllib.URLopener().retrieve(url, filename)
 except: urllib.request.urlretrieve(url, filename)
 
-# Transform the input image into a bytes object
+# Transforma la imagene en un objeto de bytes
 import cv2
 from PIL import Image
 from io import BytesIO
@@ -388,15 +396,16 @@ image.save(image2bytes, format="PNG")
 image2bytes.seek(0)
 image_as_bytes = image2bytes.read()
 
-# Send the HTTP POST request to TorchServe
+# Envía la petición HTTP POST a TorchServe
 import requests
 
 req = requests.post("http://localhost:8080/predictions/foodnet", data=image_as_bytes)
 if req.status_code == 200: res = req.json()
 ```
 
-__Note__: that to execute the sample piece of code above you will need more requirements than the ones specified in the
-[Requirements section](#hammer_and_wrench-requirements) so just run the following command so as to install them:
+__Nota__: en caso de querer ejecutar un _script_ con el código proporcionado anteriormente, se requiren más requisitos
+de los mencionados previamente en la [sección de requisitos](#hammer_and_wrench-requisitos), con lo que para instalarlos, 
+puedes utilizar el siguiente comando:
 
   ```bash
   pip install opencv-python pillow requests --upgrade
