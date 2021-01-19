@@ -158,7 +158,7 @@ def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> 
                    **kwargs)
 ```
 
-Which translated to our model file it should look like:
+Que, traducido a la arquitectura completa de nuestro modelo, será de la forma:
 
 ```python
 import torch.nn as nn
@@ -196,31 +196,32 @@ model = ImageClassifier()
 model.load_state_dict(torch.load("../model/foodnet_resnet18.pth"))
 ```
 
-Whose expected output should be `<All keys matched successfully>`.
+Así, la salida del fragmento de código anterior tras la carga del modelo, ha de ser `<All keys matched successfully>`, en caso
+de haber tenido éxito.
 
-You can find more Image Classification pre-trained PyTorch models at 
-[PyTorch Image Classification Models](https://pytorch.org/docs/stable/torchvision/models.html#classification).
+Puedes encontrar más modelos pre-entrenados de PyTorch para la clasificación de imágenes en 
+[PyTorch Image Classification Models](https://pytorch.org/docs/stable/torchvision/models.html#classification), y probar
+así distintos modelos de `transfer learning`.
 
-__Note__: the model has been trained on a NVIDIA GeForce GTX 1070 8GB GPU using CUDA 11. If you want to get you GPU specs, just
-use the `nvidia-smi` command on your console, but make sure that you have your NVIDIA drivers properly installed. So as 
-to check whether PyTorch is using the GPU you can just use the following piece of code which will tell you whether there's
-a GPU (or more) available or not and, if so, which is the name of that device depending on its ID if there's more than 
-one GPU.
+__Nota__: el modelo ha sido entrenado con una tarjeta gráfica NVIDIA GeForce GTX 1070 8GB GPU con CUDA 11. En caso de no conocer
+los requisitos de la tarjeta gráfica de tu sistema, puedes utilizar el comando `nvidia-smi`, que también te indicará si los _drivers_
+de NVIDIA y CUDA están correctamente instalados. Además, para comprobar si PyTorch está haciendo uso de la GPU disponible en el sistema
+o no, puedes utilizar el fragmento de código presentado a continuación:
 
-```python
-import torch
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-torch.cuda.get_device_name(0)
-```
+    ```python
+    import torch
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    torch.cuda.get_device_name(0)
+    ```
 
 ---
 
 ## :rocket: Despliegue
 
-In order to deploy the model you will need to reproduce the following steps once you installed all the requirements
-as described in the section above.
+Finalmente, de cara a desplegar el modelo necesitarás reproducir la siguiente secuencia de pasos tras haber instalado todos los 
+requisitos previamente mencionados y disponer del modelo entrenado, tal y como se ha descrito previamente.
 
-### 1. Generate MAR file
+### 1. Generar el fichero MAR
 
 First of all you will need to generate the MAR file, which is the servable archive of the model
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
@@ -252,7 +253,7 @@ commas.
 More information regarding `torch-model-archiver` available at 
 [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
 
-### 2. Deploy TorchServe
+### 2. Desplegar TorchServe
 
 Once you create the MAR servable model, you just need to serve it. The serving process
 of a pre-trained PyTorch model as a MAR file, starts with the deployment of the TorchServe REST APIs, which are the
@@ -283,7 +284,7 @@ curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
 
 More information regarding `torchserve` available at [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
 
-### 3. Check its status
+### 3. Comprobar el estado de TorchServe
 
 In order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
 request to the Inference API deployed by default in the `8080` port, but you should check the `config.properties` file, which
@@ -305,7 +306,7 @@ __Note__: If the status of the health-check request was `"Unhealthy"`, you shoul
 you did run the TorchServe deployment or from the `logs/` directory that is created automatically while deploying TorchServe from
 the same directory where you deployed it.
 
-### 4. Stop TorchServe
+### 4. Parar TorchServe
 
 Once you are done and you no longer need TorchServe, you can gracefully shut it down with the
 following command:
@@ -323,7 +324,8 @@ bit more of time depending on your machine specs.
 
 ## :whale2: Docker
 
-In order to reproduce the TorchServe deployment in an Ubuntu Docker image, you should just use the following set of commands:
+Con el fin de reproducir el despliegue de PyTorch, tal y como se ha descrito antes, en una imagen de Docker sobre Ubuntu, 
+tendrás que asegurarte de tener Docker instalado en tu máquina y proceder con la ejecución de los comandos presentados a continuación:
 
 ```bash
 docker build -t ubuntu-torchserve:latest deployment/
@@ -333,10 +335,9 @@ docker run --rm --name torchserve_docker \
            torchserve --model-store /home/model-server/model-store/ --models foodnet=foodnet_resnet18.mar
 ```
 
-For more information regarding the Docker deployment, you should check TorchServe's 
-explanation and notes available at [pytorch/serve/docker](https://github.com/pytorch/serve/tree/master/docker), 
-as it also explains how to use their Docker image (instead of a clear Ubuntu one) and
-some tips regarding the production deployment of the models using TorchServe.
+Para más información en lo referente al despliegue desde Docker, puedes acudir a la documentación de TorchServe 
+en la que se detalla el uso de Docker para el despliegue y notas adicionales disponible en 
+[pytorch/serve/docker](https://github.com/pytorch/serve/tree/master/docker).
 
 ---
 
@@ -370,9 +371,10 @@ Que, si todo ha ido bien, debería de devolver una salida en formato JSON como l
 }
 ```
 
-__Remember__: that the original inference's output is the dict with the identifier of each class, not the class names,
-in this case as we included `index_to_name.json` as an extra-file while creating the MAR, TorchServe is automatically 
-assigning the identifiers with the class names so that the prediction is clearer.
+__Recuerda__: el hecho de que la respuesta de la petición HTTP POST a TorchServe esté formateada con los nombres originales de 
+cada una de las categorías de comida, se debe a que durante la creación del fichero MAR se especifico el índice al que correspondía
+cada categoría, en el fichero `index_to_name.json`. Así TorchServe realiza la asignación de índices a categorías de forma automática
+al responder a la petición a la API para la inferencia, de modo que es más clara.
 
   ---
 
