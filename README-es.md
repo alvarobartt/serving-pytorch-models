@@ -105,7 +105,8 @@ Once loaded, we need to update the `fc` layer, which stands for fully connected 
 layer of the model, and over the one that the weights will be calculated to optimize the network 
 for our dataset.
 
-In this concrete case we included the following sequential layer:
+En este caso concreto, incluimos una capa secuencial que se añadirá tras las capas convolucionales
+del modelo original. Así la capa secuencial incluida es la que se muestra en el siguiente bloque de código:
 
 ```python
 import torch.nn as nn
@@ -144,7 +145,7 @@ modify the original ResNet18 class. You can find the original class for this mod
 [torchvision/models/segmentation](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py#L268-L277)
 and for the rest of the PyTorch pre-trained models at [torchvision/models](https://github.com/pytorch/vision/tree/master/torchvision/models).
 
-The code for the ResNet18 model looks like:
+El código original de PyTorch del modelo ResNet18 es el siguiente:
 
 ```python
 def resnet18(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> ResNet:
@@ -223,8 +224,9 @@ requisitos previamente mencionados y disponer del modelo entrenado, tal y como s
 
 ### 1. Generar el fichero MAR
 
-First of all you will need to generate the MAR file, which is the servable archive of the model
-generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
+Inicialmente se ha de generar el fichero MAR, que es un fichero listo para servir y que contiene el modelo completo
+generado con `torch-model-archiver` a partir del `state_dict` exportado previamente. Para generar así el fichero MAR
+tienes que utilizar el siguiente comando:
 
 ```bash
 torch-model-archiver --model-name foodnet_resnet18 \
@@ -235,7 +237,9 @@ torch-model-archiver --model-name foodnet_resnet18 \
                      --extra-files model/index_to_name.json
 ```
 
-Once generated you will need to place the MAR file into the `deployment/model-store` directory as it follows:
+Una vez generado el fichero MAR, tienes que moverlo al directorio [_deployment/model-store_](deployment/model-store) que
+contendrá tanto este modelo como el resto de modelos puesto que a TorchServe se le indica el directorio sobre el cual ha de 
+leer los modelos de PyTorch para servirlos más adelante.
 
 ```bash
 mv foodnet_resnet18.mar deployment/model-store/
@@ -250,7 +254,7 @@ problem you can include the dictionary/json containing the relationships between
 also additional files required by the model-file to work properly, with the flag `--extra-files`, separating the different files with 
 commas.
 
-More information regarding `torch-model-archiver` available at 
+Puedes encontrar más información sobre `torch-model-archiver` en 
 [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
 
 ### 2. Desplegar TorchServe
@@ -261,7 +265,8 @@ Inference API, Management API and Metrics API, deployed by default on `localhost
 ports 8080, 8081 and 8082, respectively. While deploying TorchServe, you can also specify the directory where the MAR files
 are stored, so that they are deployed within the API at startup.
 
-So on, the command to deploy the current MAR model stored under `deployment/model-store/` is the following:
+De este modo, el comando para desplegar TorchServe junto con el modelo MAR generado previamente,
+disponible en el directorio [_deployment/model-store/_](deployment/model-store/), es el siguiente:
 
 ```bash
 torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store --models foodnet=foodnet_resnet18.mar
@@ -273,28 +278,30 @@ which is something optional too, `--model-store` is the directory where the MAR 
 `--models` is(are) the name(s) of the model(s) that will be served on the startup, including both an alias 
 which will be the API endpoint of that concrete model and the filename of that model, with format `endpoint=model_name.mar`.
 
-__Note__: another procedure can be deploying TorchServe first (without defining the models), then registering the model using
-the Management API and then scaling the number of workers (if needed).
+__Nota__: otra forma de proceder en el despliegue consiste en desplegar primero TorchServe sin ningún modelo indicado en
+tiempo de despliegue y, en su defecto, registrar el modelo o modelos a través de la API de _management_ (que también permite
+gestionar los _workers_ asignados a cada modelo entre otras cosas).
 
-```bash
-torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store
-curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"
-curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
-```
+    ```bash
+    torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store
+    curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"
+    curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
+    ```
 
-More information regarding `torchserve` available at [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
+Puedes encontrar más información sobre `torchserve` en [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
 
 ### 3. Comprobar el estado de TorchServe
 
-In order to check the availability of the deployed TorchServe API, you can just send a HTTP GET
-request to the Inference API deployed by default in the `8080` port, but you should check the `config.properties` file, which
-specifies `inference_address` including the port.
+Para comprobar la disponibilidad de TorchServe tras el despliegue, puedes enviar una petición HTTP GET a la API para la inferencia
+desplegada por defecto en el puerto 8080 con el comando presentado a continuación. Para conocer el puerto o puertos en los que se ha 
+desplegado cada una de las APIs, puedes comprobar el fichero [_config.properties_](deployment/config.properties) que contiene dicha
+información sobre los servicios desplegados por TorchServe.
 
 ```bash
 curl http://localhost:8080/ping
 ```
 
-If everything goes as expected, it should output the following response:
+Si todo ha ido como se esperaba, debería de mostrar una salida similar a la siguiente:
 
 ```json
 {
@@ -302,23 +309,23 @@ If everything goes as expected, it should output the following response:
 }
 ```
 
-__Note__: If the status of the health-check request was `"Unhealthy"`, you should check the logs either from the console from where
-you did run the TorchServe deployment or from the `logs/` directory that is created automatically while deploying TorchServe from
-the same directory where you deployed it.
+__Nota__: si el estado del _health check_ es `"Unhealthy"`, deberías de comprobar los _logs_ de TorchServe para 
+comprobar que el despliegue fue correctamente y, en caso de no haber ido bien, identificar el error e intentar resolverlo.
+Al desplegar o intentar desplegar TorchServe, se creará automáticamente un directorio, desde donde se usó el comando, 
+llamado `logs/`, donde poder comprobar si el despliegue ha ido como se esperaba.
 
 ### 4. Parar TorchServe
 
-Once you are done and you no longer need TorchServe, you can gracefully shut it down with the
-following command:
+Una vez se "termine" de utilizar TorchServe con idea de no utilizarlo más, puedes pararlo de forma elegante con el 
+siguiente comando:
   
 ```bash
 torchserve --stop
 ```
 
-Then the next time you deploy TorchServe, it will take less time than the first one if the models to be server were already
-registered/loaded, as TorchServe keeps them cached under a `/tmp` directory so it won't need to load them again if neither the name nor 
-the version changed. On the other hand, if you register a new model, TorchServe will have to load it and it may take a little 
-bit more of time depending on your machine specs. 
+Así la próxima vez que despliegues TorchServe, tardará menos tiempo puesto que en el primer despliegue, tanto los modelos 
+especificados durante el despliegue como los modelos registrados más adelante, serán cacheados, de modo que en los siguientes
+despliegues de TorchServe, dichos modelos no requerirán ser registrados de nuevo por estar ya en caché.
 
 ---
 
