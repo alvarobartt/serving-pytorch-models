@@ -228,20 +228,28 @@ torch-model-archiver --model-name foodnet_resnet18 \
                      --extra-files model/index_to_name.json
 ```
 
+So __torch-model-archiver__'s used flags stand for:
+
+- `--model-name`: name that the generated MAR servable file will have.
+- `--version`: it's optional even though it's a nice practice to include the version of the models 
+so as to keep a proper tracking over them.
+- `--model-file`: file where the model architecture is defined.
+- `--serialized-file`: the dumped state_dict of the trained model weights.
+- `--handler`: the Python fiel which defines the data preprocessing, inference and postprocessing.
+- `--extra-files`: as this is a classification problem you can include the dictionary/json containing 
+the relationships between the IDs (model's target) and the labels/names and/or also additional files 
+required by the model-file to format the output data in a cleaner way.
+
+__Note__: you can define custom handlers, but you don't need to as there are already some default handlers
+per every possible problem defined by TorchServe and accessible through a simple string. The current possible 
+default handlers are: "image_classifier", "image_segmenter", "object_detector" and "text_classifier". You can 
+find more information at [TorchServe Default Handlers](https://pytorch.org/serve/default_handlers.html)
+
 Once generated you will need to place the MAR file into the `deployment/model-store` directory as it follows:
 
 ```bash
 mv foodnet_resnet18.mar deployment/model-store/
 ```
-
-Where the flag `--model-name` stands for the name that the generated MAR servable file will have, the `--version` is optional
-but it's a nice practice to include the version of the models so as to keep a proper tracking over them and finally you will need
-to specify the model's architecture file with the flag `--model-file`, the dumped state_dict of the trained model with the flag
-`--serialized-file` and the handler which will be in charge of the data preprocessing, inference and postprocessing with `--handler`,
-but you don't need to create custom ones as you can use the available handlers at TorchServe. Additionally, as this is a classification
-problem you can include the dictionary/json containing the relationships between the IDs (model's target) and the labels/names and/or 
-also additional files required by the model-file to work properly, with the flag `--extra-files`, separating the different files with 
-commas.
 
 More information regarding `torch-model-archiver` available at 
 [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
@@ -260,10 +268,13 @@ So on, the command to deploy the current MAR model stored under `deployment/mode
 torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store --models foodnet=foodnet_resnet18.mar
 ```
 
-Where the flag `--start` means that you want to start the TorchServe service (deploy the APIs), the flag `--ncs`
-means that you want to disable the snapshot feature (optional), `--ts-config` to include the configuration file
-which is something optional too, `--model-store` is the directory where the MAR files are stored and 
-`--models` is(are) the name(s) of the model(s) that will be served on the startup, including both an alias 
+So __torchserve__'s used flags stand for:
+
+- `--start`: means that you want to start the TorchServe service (deploy the APIs).
+- `--ncs`: means that you want to disable the snapshot feature (optional).
+- `--ts-config`: to include the configuration file which is something optional too.
+- `--model-store`: is the directory where the MAR files are stored. 
+- `--models`: is(are) the name(s) of the model(s) that will be served on the startup, including both an alias 
 which will be the API endpoint of that concrete model and the filename of that model, with format `endpoint=model_name.mar`.
 
 __Note__: another procedure can be deploying TorchServe first (without defining the models), then registering the model using
