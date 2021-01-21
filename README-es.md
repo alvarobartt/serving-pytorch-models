@@ -241,6 +241,22 @@ torch-model-archiver --model-name foodnet_resnet18 \
                      --extra-files model/index_to_name.json
 ```
 
+A continuación, se presenta el significado de cada uno de los flags utilizados por __torch-model-archiver__:
+
+- `--model-name`: indica el nombre del modelo en formato MAR que vamos a generar.
+- `--version`: se refiere a la version del modelo, lo cual es una buena práctica a la hora de mantener los modelos
+puesto que se degradan con el tiempo.
+- `--model-file`: contiene el fichero de Python que contiene la clase con la arquitectura del modelo que vamos a servir.
+- `--serialized-file`: contiene el _state dict_ con los pesos del modelo ya entrenado.
+- `--handler`: especifica el cómo se van a manejar los datos en las llamadas a dicho modelo, por lo que incluye tanto el preprocesamiento
+como el postprocesamiento.
+- `--extra-files`: dado que este es un problema de clasificación de imágenes, se puede incluir un fichero JSON que contenga 
+las relaciones entre los IDs que asigna el modelo con los nombres de las categorías o etiquetas asignadas a cada uno de los IDs.
+
+Mencionar que no se requiere crear _handlers_ personalizados puesto que los disponibles en TorchServe
+son bastante útiles, pero en caso de necesitar redefinir cualquiera de los procesos, preprocesamiento o postprocesamiento, se 
+podrá crear uno personalizado como el presentado en este proyecto.
+
 Una vez generado el fichero MAR, tienes que moverlo al directorio [_deployment/model-store_](deployment/model-store) que
 contendrá tanto este modelo como el resto de modelos puesto que a TorchServe se le indica el directorio sobre el cual ha de 
 leer los modelos de PyTorch para servirlos más adelante.
@@ -248,18 +264,6 @@ leer los modelos de PyTorch para servirlos más adelante.
 ```bash
 mv foodnet_resnet18.mar deployment/model-store/
 ```
-
-Así el flag `--model-name` indica el nombre del modelo en formato MAR que vamos a generar, el flag `--version`, como su
-propio nombre indica, se refiere a la version del modelo, lo cual es una buena práctica a la hora de mantener los modelos
-puesto que es importante mantener los modelos puesto que estos se degradan con el tiempo, el flag `--model-file`
-que contiene el fichero de Python que contiene la clase con la arquitectura del modelo que vamos a servir, el flag 
-`--serialized-file` que contiene el _state dict_ con los pesos del modelo ya entrenado y, finalmente, el flag `--handler`
-que especifica el cómo se van a manejar los datos en las llamadas a dicho modelo, por lo que incluye tanto el preprocesamiento
-como el postprocesamiento. Mencionar que no se requiere crear _handlers_ personalizados puesto que los disponibles en TorchServe
-son bastante útiles, pero en caso de necesitar redefinir cualquiera de los procesos, preprocesamiento o postprocesamiento, se 
-podrá crear uno personalizado como el presentado en este proyecto. Adicionalmente, dado que este es un problema de clasificación de 
-imágenes, se puede incluir un fichero JSON que contenga las relaciones entre los IDs que asigna el modelo con los nombres de las
-categorías o etiquetas asignadas a cada uno de los IDs con el flag `--extra-files`.
 
 Puedes encontrar más información sobre `torch-model-archiver` en 
 [Torch Model Archiver for TorchServe](https://github.com/pytorch/serve/blob/master/model-archiver/README.md).
@@ -278,15 +282,19 @@ disponible en el directorio [_deployment/model-store/_](deployment/model-store/)
 torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store --models foodnet=foodnet_resnet18.mar
 ```
 
-Donde el flag `--start` indica que el servicio de TorchServe se va a desplegar (es decir, las APIs), el flag `--ncs`
-indica que se desactivará el _snapshot_ para no hacer una copia del contenido de la API, lo cual reduce los tiempos de 
-despliegue, pero por seguridad se puede activar (sin poner dicho flag), el flag `--ts-config` especifica la configuración 
-del despliegue a utilizar desde el fichero de configuración, el flag `--model-store` indica el directorio desde el cual 
-se van a leer los ficheros MAR listos para ser servidos (expuestos como un _endpoint_ de las APIs) y, finalmente, el flag
-`--models` que especifica los nombres de los modelos a utilizar, de modo que a cada uno de los modelos disponibles, bajo 
-el directorio mencionado previamente, se les podrá asignar un alias que será a través del cual se creará el _endpoint_ para
-acceder a dicho modelo desde las APIs REST, sino se utilizarán los nombres por defecto, pero lo recomendable es especificar 
-manualmente el nombre de todos los modelos a servir con el formato: _endpoint=model_name.mar_.
+A continuación, se presenta el significado de cada uno de los flags utilizados por __torchserve__:
+
+- `--start`: indica que el servicio de TorchServe se va a desplegar (es decir, las APIs).
+- `--ncs`: indica que se desactivará el _snapshot_ para no hacer una copia del contenido de la API, 
+lo cual reduce los tiempos de despliegue, pero por seguridad se puede activar (sin poner dicho flag).
+- `--ts-config`: especifica la configuración del despliegue a utilizar desde el fichero de configuración.
+- `--model-store`: indica el directorio desde el cual se van a leer los ficheros MAR listos para ser 
+servidos (expuestos como un endpoint de las APIs).
+- `--models`: especifica los nombres de los modelos a utilizar, de modo que a cada uno de los modelos 
+disponibles, bajo el directorio mencionado previamente, se les podrá asignar un alias que será a través 
+del cual se creará el endpoint para acceder a dicho modelo desde las APIs REST. Sino, se utilizarían los 
+nombres por defecto del fichero, pero lo recomendable es especificar manualmente el nombre de todos los 
+modelos a servir con el formato: _endpoint=model_name.mar_.
 
 __Nota__: otra forma de proceder en el despliegue consiste en desplegar primero TorchServe sin ningún modelo indicado en
 tiempo de despliegue y, en su defecto, registrar el modelo o modelos a través de la API de _management_ (que también permite
