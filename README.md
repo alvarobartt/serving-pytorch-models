@@ -41,7 +41,7 @@ Then you can proceed with the installation of the PyTorch Python packages requir
 both training and serving the model. 
 
 ```bash
-pip install torch==1.7.0+cpu torchvision==0.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.7.0 torchvision==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 pip install torchserve==0.2.0 torch-model-archiver==0.2.0
 ```
 
@@ -265,7 +265,11 @@ are stored, so that they are deployed within the API at startup.
 So on, the command to deploy the current MAR model stored under `deployment/model-store/` is the following:
 
 ```bash
-torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store --models foodnet=foodnet_resnet18.mar
+torchserve --start \
+           --ncs \
+           --ts-config deployment/config.properties \
+           --model-store deployment/model-store \
+           --models foodnet=foodnet_resnet18.mar
 ```
 
 So __torchserve__'s used flags stand for:
