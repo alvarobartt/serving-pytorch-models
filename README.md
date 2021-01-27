@@ -65,7 +65,7 @@ just a slice of 10 classes, which is more or less the 10% of the dataset.
 This dataset consists of 101 food categories, with 101'000 images. For each class, 250 manually 
 reviewed test images are provided as well as 750 training images. On purpose, the training images 
 were not cleaned, and thus still contain some amount of noise. This comes mostly in the form of 
-intense colors and sometimes wrong labels. All images were rescaled to have a maximum side length 
+intense colors and sometimes wrong labels. All images were resized to have a maximum side length 
 of 512 pixels.
 
 ![](https://raw.githubusercontent.com/alvarobartt/serving-pytorch-models/master/images/data.jpg)
@@ -116,7 +116,7 @@ model.fc = sequential_layer
 ```
 
 Then we will train the model with the TRAIN dataset which contains 750 images and that has been 
-splitted as 80%-20% for training and validation, respectively. And tested over the TEST dataset 
+split as 80%-20% for training and validation, respectively. And tested over the TEST dataset 
 which contains 2500 images.
 
 __Note__: for more details regarding the model training process, feel free to check it at 
@@ -216,7 +216,7 @@ as described in the section above.
 
 ### 1. Generate MAR file
 
-First of all you will need to generate the MAR file, which is the servable archive of the model
+First of all you will need to generate the MAR file, which is the "ready to serve" archive of the model
 generated with `torch-model-archiver`. So on, in order to do so, you will need to use the following command:
 
 ```bash
@@ -230,12 +230,12 @@ torch-model-archiver --model-name foodnet_resnet18 \
 
 So __torch-model-archiver__'s used flags stand for:
 
-- `--model-name`: name that the generated MAR servable file will have.
+- `--model-name`: name that the generated MAR "ready to serve" file will have.
 - `--version`: it's optional even though it's a nice practice to include the version of the models 
 so as to keep a proper tracking over them.
 - `--model-file`: file where the model architecture is defined.
 - `--serialized-file`: the dumped state_dict of the trained model weights.
-- `--handler`: the Python fiel which defines the data preprocessing, inference and postprocessing.
+- `--handler`: the Python file which defines the data preprocessing, inference and postprocessing.
 - `--extra-files`: as this is a classification problem you can include the dictionary/json containing 
 the relationships between the IDs (model's target) and the labels/names and/or also additional files 
 required by the model-file to format the output data in a cleaner way.
@@ -256,7 +256,7 @@ More information regarding `torch-model-archiver` available at
 
 ### 2. Deploy TorchServe
 
-Once you create the MAR servable model, you just need to serve it. The serving process
+Once you create the MAR \ model, you just need to serve it. The serving process
 of a pre-trained PyTorch model as a MAR file, starts with the deployment of the TorchServe REST APIs, which are the
 Inference API, Management API and Metrics API, deployed by default on `localhost` (of if you prefer `127.0.0.1`) in the
 ports 8080, 8081 and 8082, respectively. While deploying TorchServe, you can also specify the directory where the MAR files
