@@ -213,11 +213,11 @@ los requisitos de la tarjeta gráfica de tu sistema, puedes utilizar el comando 
 de NVIDIA y CUDA están correctamente instalados. Además, para comprobar si PyTorch está haciendo uso de la GPU disponible en el sistema
 o no, puedes utilizar el fragmento de código presentado a continuación:
 
-    ```python
-    import torch
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    torch.cuda.get_device_name(0)
-    ```
+```python
+import torch
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.cuda.get_device_name(0)
+```
 
 ---
 
@@ -300,11 +300,11 @@ __Nota__: otra forma de proceder en el despliegue consiste en desplegar primero 
 tiempo de despliegue y, en su defecto, registrar el modelo o modelos a través de la API de _management_ (que también permite
 gestionar los _workers_ asignados a cada modelo entre otras cosas).
 
-    ```bash
-    torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store
-    curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"
-    curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
-    ```
+```bash
+torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store
+curl -X POST "http://localhost:8081/models?initial_workers=1&synchronous=true&url=foodnet_resnet18.mar"
+curl -X PUT "http://localhost:8081/models/foodnet?min_worker=3"
+```
 
 Puedes encontrar más información sobre `torchserve` en [TorchServe CLI](https://pytorch.org/serve/server.html#command-line-interface).
 
@@ -434,9 +434,9 @@ __Nota__: en caso de querer ejecutar un _script_ con el código proporcionado an
 de los mencionados previamente en la [sección de requisitos](#hammer_and_wrench-requisitos), con lo que para instalarlos, 
 puedes utilizar el siguiente comando:
 
-  ```bash
-  pip install opencv-python pillow requests --upgrade
-  ```
+```bash
+pip install opencv-python pillow requests --upgrade
+```
 
 ---
 
