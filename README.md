@@ -18,13 +18,13 @@ __Note that this is the English version, for the Spanish version please read [RE
 
 ## :closed_book: Table of Contents
 
-- [Requirements](#hammer_and_wrench-requirements)
-- [Dataset](#open_file_folder-dataset)
-- [Modelling](#robot-modelling)
-- [Deployment](#rocket-deployment)
-- [Docker](#whale2-docker)
-- [Usage](#mage_man-usage)
-- [Credits](#computer-credits)
+- [:hammer_and_wrench: Requirements](#hammer_and_wrench-requirements)
+- [:open_file_folder: Dataset](#open_file_folder-dataset)
+- [:robot: Modelling](#robot-modelling)
+- [:rocket: Deployment](#rocket-deployment)
+- [:whale2: Docker](#whale2-docker)
+- [:mage_man: Usage](#mage_man-usage)
+- [:computer: Credits](#computer-credits)
 
 ---
 
